@@ -3,14 +3,30 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour {
+    private Rigidbody2D rb;
+    private bool grounded = false;
 
-	// Use this for initialization
+    private const float gravityVelocity = -9.8f;
+    
 	void Start () {
-		
+        rb = GetComponent<Rigidbody2D>();
 	}
-	
-	// Update is called once per frame
+
+    void FixedUpdate() {
+        applyGravity();
+    }
+
 	void Update () {
-		
+
 	}
+
+    void applyGravity() {
+        if(!grounded) {
+            rb.AddForce(new Vector2(0f, gravityVelocity));
+        }
+    }
+
+    void updateRaycasts() {
+        
+    }
 }
