@@ -10,7 +10,7 @@ public class PlayerMovement : MonoBehaviour {
 
     private const float PLAYER_MOVE_SPEED_FACTOR = 5f;
     private const int LAYER_TERRAIN = 1 << 9;
-    private const float GRAVITY_VELOCITY = -9.8f;
+    private const float GRAVITY_VELOCITY = -20f;
     
     
 	void Start () {
@@ -34,6 +34,11 @@ public class PlayerMovement : MonoBehaviour {
 
         if(Input.GetKey(KeyCode.A)) {
             transform.Translate(-Vector2.right * PLAYER_MOVE_SPEED_FACTOR  * Time.deltaTime);
+        }
+
+        if(Input.GetKeyDown(KeyCode.Space)) {
+            grounded = false;
+            rb.AddForce(Vector2.up * 10f, ForceMode2D.Impulse);
         }
     }
 
@@ -68,7 +73,10 @@ public class PlayerMovement : MonoBehaviour {
 
                 // special logic for downward collisions
                 grounded = true;
-                transform.position = new Vector2(transform.position.x, hit.collider.gameObject.transform.position.y + 1f);
+
+                if(rb.velocity.y < 0) {
+                    transform.position = new Vector2(transform.position.x, hit.collider.gameObject.transform.position.y + 1f);
+                }
             }
         }
 
