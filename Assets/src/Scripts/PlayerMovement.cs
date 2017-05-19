@@ -26,7 +26,6 @@ public class PlayerMovement : MonoBehaviour {
 
 	void Update () {
         updateCollisions();
-        Debug.Log(collisions.left);
     }
 
     void applyGravity() {
