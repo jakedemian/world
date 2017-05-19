@@ -8,6 +8,7 @@ public class PlayerMovement : MonoBehaviour {
     private CollisionDirections collisions = new CollisionDirections();
     private Vector2 playerDimensions;
 
+    private const float PLAYER_MOVE_SPEED_FACTOR = 5f;
     private const int LAYER_TERRAIN = 1 << 9;
     private const float GRAVITY_VELOCITY = -9.8f;
     
@@ -26,6 +27,14 @@ public class PlayerMovement : MonoBehaviour {
 
 	void Update () {
         updateCollisions();
+
+        if(Input.GetKey(KeyCode.D)) {
+            transform.Translate(Vector2.right * PLAYER_MOVE_SPEED_FACTOR  * Time.deltaTime);
+        }
+
+        if(Input.GetKey(KeyCode.A)) {
+            transform.Translate(-Vector2.right * PLAYER_MOVE_SPEED_FACTOR  * Time.deltaTime);
+        }
     }
 
     void applyGravity() {
@@ -76,6 +85,8 @@ public class PlayerMovement : MonoBehaviour {
 
             if(hit) {
                 collisions.up = true;
+
+                //transform.position = new Vector2(transform.position.x, hit.collider.gameObject.transform.position.y - 1f);
             }
         }
 
@@ -92,6 +103,8 @@ public class PlayerMovement : MonoBehaviour {
 
             if(hit) {
                 collisions.right = true;
+
+                //transform.position = new Vector2(hit.collider.gameObject.transform.position.x - 1f, transform.position.y);
             }
         }
 
@@ -108,6 +121,8 @@ public class PlayerMovement : MonoBehaviour {
 
             if(hit) {
                 collisions.left = true;
+
+                //transform.position = new Vector2(hit.collider.gameObject.transform.position.x + 1f, transform.position.y);
             }
         }
 
