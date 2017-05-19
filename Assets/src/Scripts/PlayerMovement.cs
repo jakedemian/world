@@ -8,6 +8,7 @@ public class PlayerMovement : MonoBehaviour {
     private CollisionDirections collisions = new CollisionDirections();
     private Vector2 playerDimensions;
 
+    private const float MAX_PLAYER_FALL_SPEED = -15f;
     private const float PLAYER_MOVE_SPEED_FACTOR = 5f;
     private const int LAYER_TERRAIN = 1 << 9;
     private const float GRAVITY_VELOCITY = -20f;
@@ -39,6 +40,14 @@ public class PlayerMovement : MonoBehaviour {
         if(Input.GetKeyDown(KeyCode.Space)) {
             grounded = false;
             rb.AddForce(Vector2.up * 10f, ForceMode2D.Impulse);
+        }
+
+        capPlayerFallSpeed();
+    }
+
+    void capPlayerFallSpeed() {
+        if(rb.velocity.y < MAX_PLAYER_FALL_SPEED) {
+            rb.velocity = new Vector2(rb.velocity.x, MAX_PLAYER_FALL_SPEED);
         }
     }
 
