@@ -21,7 +21,7 @@ public class PlayerMovement : MonoBehaviour {
 	}
 
     void FixedUpdate() {
-        //applyGravity();
+        applyGravity();
     }
 
 	void Update () {
@@ -31,6 +31,8 @@ public class PlayerMovement : MonoBehaviour {
     void applyGravity() {
         if(!grounded) {
             rb.AddForce(new Vector2(0f, GRAVITY_VELOCITY));
+        } else {
+            rb.velocity = new Vector2(rb.velocity.x, 0f);
         }
     }    
 
@@ -42,6 +44,7 @@ public class PlayerMovement : MonoBehaviour {
 
         // down
         collisions.down = false;
+        grounded = false;
         for(int i = 0; i < raycastCount; i++) {
             float subDivDistance = playerDimensions.x / (float)(raycastCount - 1);
             Vector2 rayStart = new Vector2(
@@ -53,6 +56,10 @@ public class PlayerMovement : MonoBehaviour {
 
             if(hit) {
                 collisions.down = true;
+
+                // special logic for downward collisions
+                grounded = true;
+                transform.position = new Vector2(transform.position.x, hit.collider.gameObject.transform.position.y + 1f);
             }
         }
 
