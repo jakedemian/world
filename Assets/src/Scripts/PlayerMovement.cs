@@ -6,6 +6,7 @@ public class PlayerMovement : MonoBehaviour {
     private Rigidbody2D rb;
     private bool grounded = false;
     private CollisionDirections collisions = new CollisionDirections();
+    private Bounds playerBounds;
     private Vector2 playerDimensions;
 
     private const float MAX_PLAYER_FALL_SPEED = -15f;
@@ -19,8 +20,8 @@ public class PlayerMovement : MonoBehaviour {
         rb = GetComponent<Rigidbody2D>();
 
         // update player dimensions
-        Bounds b = GetComponent<BoxCollider2D>().bounds;
-        playerDimensions = new Vector2(b.max.x - b.min.x, b.max.y - b.min.y);
+        playerBounds = GetComponent<BoxCollider2D>().bounds;
+        playerDimensions = new Vector2(playerBounds.max.x - playerBounds.min.x, playerBounds.max.y - playerBounds.min.y);
 	}
 
     void FixedUpdate() {
@@ -38,13 +39,8 @@ public class PlayerMovement : MonoBehaviour {
         if(Input.GetAxisRaw("Horizontal") != 0) {
             if(Input.GetAxisRaw("Horizontal") > 0) {
                 Vector2 moveDir = Vector2.right;
-                if(collisions.right) {
-                    // calculate our translate to move up the hill OR if it's too steep, stop the player's horizontal velocity and reset them
-                }
-
                 transform.Translate(moveDir * PLAYER_MOVE_SPEED_FACTOR * Time.deltaTime);
             } else if(Input.GetAxisRaw("Horizontal") < 0) {
-
                 transform.Translate(-Vector2.right * PLAYER_MOVE_SPEED_FACTOR * Time.deltaTime);
             }
         }
@@ -73,91 +69,86 @@ public class PlayerMovement : MonoBehaviour {
         if(!grounded) {
             rb.AddForce(new Vector2(0f, GRAVITY_VELOCITY));
         }
-    }    
+    }
+
+    private RaycastHit2D spawnRaycasts(Vector2 startPoint1, Vector2 startPoint2, Vector2 direction) {
+        Debug.DrawRay(startPoint1, direction * 0.1f, Color.green);
+        Debug.DrawRay(startPoint2, direction * 0.1f, Color.green);
+
+        RaycastHit2D hit = Physics2D.Raycast(startPoint1, direction, 0.1f, LAYER_TERRAIN);
+        if(hit) {
+            return hit;
+        } else {
+            return Physics2D.Raycast(startPoint2, direction, 0.1f, LAYER_TERRAIN);
+        }
+    }
 
     /// <summary>
     /// Update the player's collision states in all directions
     /// </summary>
-    void updateCollisions() {
-        int vertRaycasts = 7;
-        int horizRaycasts = 3;
+    private void updateCollisions() {
+        playerBounds = GetComponent<BoxCollider2D>().bounds;
 
-        // TODO FIXME refactor this method, up/down and right/left can probably be largely combined in some way.  the the repositioning inside the
-        // if(hit) blocks, it needs to dynamically move the player ouside of the collision rather than assume a radius of 0.5 (movement of 1f).
+        Vector2 bottomLeft = new Vector2(playerBounds.min.x + 0.001f, playerBounds.min.y + 0.001f);
+        Vector2 bottomRight = new Vector2(playerBounds.max.x - 0.001f, playerBounds.min.y + 0.001f);
+        Vector2 topLeft = new Vector2(playerBounds.min.x + 0.001f, playerBounds.max.y - 0.001f);
+        Vector2 topRight = new Vector2(playerBounds.max.x - 0.001f, playerBounds.max.y - 0.001f);
 
+        collisions.clear();
+
+        ////////////////////////////////
         // down
-        collisions.down = false;
         grounded = false;
-        for(int i = 0; i < horizRaycasts; i++) {
-            float subDivDistance = playerDimensions.x / (float)(horizRaycasts - 1);
-            Vector2 rayStart = new Vector2(
-                (transform.position.x - (playerDimensions.x / 2f)) + (subDivDistance * i),
-                transform.position.y - (playerDimensions.y / 2f));
+        RaycastHit2D hit = spawnRaycasts(bottomLeft, bottomRight, Vector2.down);
+        if(hit) {
+            collisions.down = true;
+            grounded = true;
 
-            RaycastHit2D hit = Physics2D.Raycast(rayStart, -Vector2.up, 0.1f, LAYER_TERRAIN);
-            Debug.DrawRay(rayStart, -Vector2.up * 0.1f, Color.green);
-
-            if(hit) {
-                collisions.down = true;
-
-                // special logic for downward collisions
-                grounded = true;
-
-                if(rb.velocity.y < 0) {
-                    rb.velocity = new Vector2(rb.velocity.x, 0f);
-                    transform.position = new Vector2(transform.position.x, hit.collider.gameObject.transform.position.y + 1f);
-                }
+            if(rb.velocity.y < 0) {
+                Debug.Log("down");
+                rb.velocity = new Vector2(rb.velocity.x, 0f);
+                transform.position = new Vector2(transform.position.x, hit.collider.gameObject.transform.position.y + 1f);
             }
         }
 
+        ////////////////////////////////
         // up
-        collisions.up = false;
-        for(int i = 0; i < horizRaycasts; i++) {
-            float subDivDistance = playerDimensions.x / (float)(horizRaycasts - 1);
-            Vector2 rayStart = new Vector2(
-                (transform.position.x - (playerDimensions.x / 2f)) + (subDivDistance * i),
-                transform.position.y + (playerDimensions.y / 2f));
+        hit = spawnRaycasts(topLeft, topRight, Vector2.up);
+        if(hit) {
+            collisions.up = true;
 
-            RaycastHit2D hit = Physics2D.Raycast(rayStart, Vector2.up, 0.1f, LAYER_TERRAIN);
-            Debug.DrawRay(rayStart, Vector2.up * 0.1f, Color.green);
-
-            if(hit) {
-                collisions.up = true;
+            if(rb.velocity.y > 0) {
+                Debug.Log("up");
+                rb.velocity = new Vector2(rb.velocity.x, 0f);
                 transform.position = new Vector2(transform.position.x, hit.collider.gameObject.transform.position.y - 1f);
             }
         }
 
+        ////////////////////////////////
         // right
-        collisions.right = false;
-        for(int i = 0; i < vertRaycasts; i++) {
-            float subDivDistance = playerDimensions.y / (float)(vertRaycasts - 1);
-            Vector2 rayStart = new Vector2(
-                (transform.position.x + (playerDimensions.x / 2f)),
-                transform.position.y - (playerDimensions.y / 2f) + (subDivDistance * i) + 0.001f);
+        hit = spawnRaycasts(bottomRight, topRight, Vector2.right);
+        if(hit) {
+            Debug.Log("right?");
+            collisions.right = true;
 
-            RaycastHit2D hit = Physics2D.Raycast(rayStart, Vector2.right, 0.1f, LAYER_TERRAIN);
-            Debug.DrawRay(rayStart, Vector2.right * 0.1f, Color.green);
-
-            if(hit) {
-                collisions.right = true;
+            if(rb.velocity.x > 0) {
+                Debug.Log("right");
+                rb.velocity = new Vector2(0f, rb.velocity.y);
+                transform.position = new Vector2(hit.collider.gameObject.transform.position.x - 1f, transform.position.y);
             }
         }
 
+        ////////////////////////////////
         // left
-        collisions.left = false;
-        for(int i = 0; i < vertRaycasts; i++) {
-            float subDivDistance = playerDimensions.y / (float)(vertRaycasts - 1);
-            Vector2 rayStart = new Vector2(
-                (transform.position.x - (playerDimensions.x / 2f)),
-                transform.position.y - (playerDimensions.y / 2f) + (subDivDistance * i) + 0.001f);
+        hit = spawnRaycasts(bottomLeft, topLeft, Vector2.left);
+        if(hit) {
+            collisions.left = true;
 
-            RaycastHit2D hit = Physics2D.Raycast(rayStart, -Vector2.right, 0.1f, LAYER_TERRAIN);
-            Debug.DrawRay(rayStart, -Vector2.right * 0.1f, Color.green);
-
-            if(hit) {
-                collisions.left = true;
+            if(rb.velocity.x < 0) {
+                Debug.Log("left");
+                rb.velocity = new Vector2(0f, rb.velocity.y);
+                transform.position = new Vector2(hit.collider.gameObject.transform.position.x + 1f, transform.position.y);
             }
         }
-
     }
 }
