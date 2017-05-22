@@ -12,13 +12,15 @@ public class PlayerMovement : MonoBehaviour {
     private Bounds playerBounds;
     private Vector2 playerDimensions;
     private bool isOnWall = false;
-    private float wallJumpTimer = 0f;
+    private float inputLockTimer = 0f;
+    private float currentFacingDirection = 1; // 1 = right, -1 = left.  cannot be 0
 
     private const float MAX_PLAYER_FALL_SPEED = -18f;
-    private const float MAX_WALL_SLIDE_SPEED = -5f;
+    private const float MAX_WALL_SLIDE_SPEED = -7f;
 
     private const float PLAYER_MOVE_SPEED = 7f;
     private const float PLAYER_SPRINT_SPEED = 10f;
+    private const float PLAYER_ROLL_SPEED = 15f;
     private const float MAX_PLAYER_MOVE_SPEED = 15f;
     private const float MAX_PLAYER_MOVE_SPEED_AIR = 10f;
 
@@ -33,7 +35,7 @@ public class PlayerMovement : MonoBehaviour {
     private const float JUMP_FORCE_RELEASE_DIVIDER = 1.5f;
 
     private const float WALL_JUMP_DELAY_TIMER = 0.2f;
-    
+    private const float ROLL_DELAY_TIMER = 0.3f;
     
 	/// <summary>
     ///     START
@@ -52,12 +54,12 @@ public class PlayerMovement : MonoBehaviour {
     void FixedUpdate() {
         applyGravity();
 
-        // manage wall jump delay timer
-        if(wallJumpTimer > 0f) {
-            wallJumpTimer -= Time.deltaTime;
+        // manage input lock timer (eg: after a wall jump or a roll)
+        if(inputLockTimer > 0f) {
+            inputLockTimer -= Time.deltaTime;
 
-            if(wallJumpTimer <= 0f) {
-                wallJumpTimer = 0f;
+            if(inputLockTimer <= 0f) {
+                inputLockTimer = 0f;
             }
         }
     }
@@ -67,16 +69,27 @@ public class PlayerMovement : MonoBehaviour {
     /// </summary>
 	void Update () {
         updateCollisions();
+        handleUserInput();
+        capPlayerSpeed();
+
+        if(rb.velocity.x < 0) {
+            currentFacingDirection = -1;
+        } else if(rb.velocity.x > 0) {
+            currentFacingDirection = 1;
+        }
+    }
+
+    void handleUserInput() {
         handleMoveInput();
         handleJumpInput();
-        capPlayerSpeed();
+        handleRollInput();
     }
 
     /// <summary>
     ///     Handle a move input from the user.
     /// </summary>
     void handleMoveInput() {
-        if(Input.GetAxisRaw("Horizontal") != 0 && wallJumpTimer == 0f) {
+        if(Input.GetAxisRaw("Horizontal") != 0 && inputLockTimer == 0f) {
             float speed = Input.GetAxis("Sprint") != 0 ? PLAYER_SPRINT_SPEED : PLAYER_MOVE_SPEED;
             if(Input.GetAxisRaw("Horizontal") > 0 && !collisions.right) {
                 rb.velocity = new Vector2(speed, rb.velocity.y);
@@ -84,7 +97,7 @@ public class PlayerMovement : MonoBehaviour {
                 rb.velocity = new Vector2(-speed, rb.velocity.y);
             }
         } else {
-            if(wallJumpTimer == 0) {
+            if(inputLockTimer == 0) {
                 rb.velocity = new Vector2(rb.velocity.x / 1.2f, rb.velocity.y);
                 if(Mathf.Abs(rb.velocity.x) < 0.1f) {
                     rb.velocity = new Vector2(0f, rb.velocity.y);
@@ -97,7 +110,7 @@ public class PlayerMovement : MonoBehaviour {
     ///     Handle a jump input from the user.
     /// </summary>
     void handleJumpInput() {
-        if(Input.GetButtonDown("Jump")) {
+        if(Input.GetButtonDown("Jump") && inputLockTimer == 0f) {
             if(grounded) {
                 grounded = false;
                 rb.AddForce(Vector2.up * JUMP_FORCE, ForceMode2D.Impulse);
@@ -105,17 +118,24 @@ public class PlayerMovement : MonoBehaviour {
                 if(collisions.right) {
                     Vector2 upLeft = new Vector2(-1f, 1f) * WALL_JUMP_FORCE;
                     rb.velocity = upLeft;
-                    wallJumpTimer = WALL_JUMP_DELAY_TIMER;
+                    inputLockTimer = WALL_JUMP_DELAY_TIMER;
                 } else if(collisions.left) {
                     Vector2 upRight = new Vector2(1f, 1f) * WALL_JUMP_FORCE;
                     rb.velocity = upRight;
-                    wallJumpTimer = WALL_JUMP_DELAY_TIMER;
+                    inputLockTimer = WALL_JUMP_DELAY_TIMER;
                 }
             }
         } else if(Input.GetButtonUp("Jump")) {
             if(!grounded && rb.velocity.y > 0) {
                 rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / JUMP_FORCE_RELEASE_DIVIDER);
             }
+        }
+    }
+
+    void handleRollInput() {
+        if(Input.GetButtonDown("Roll") && grounded && inputLockTimer == 0f) {
+            inputLockTimer = ROLL_DELAY_TIMER;
+            rb.velocity = new Vector2(currentFacingDirection * PLAYER_ROLL_SPEED, rb.velocity.y);
         }
     }
 
