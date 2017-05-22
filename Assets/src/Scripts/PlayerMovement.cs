@@ -14,6 +14,7 @@ public class PlayerMovement : MonoBehaviour {
     private bool isOnWall = false;
     private float inputLockTimer = 0f;
     private float currentFacingDirection = 1; // 1 = right, -1 = left.  cannot be 0
+    private PlayerData playerData;
 
     private const float MAX_PLAYER_FALL_SPEED = -18f;
     private const float MAX_WALL_SLIDE_SPEED = -7f;
@@ -42,6 +43,7 @@ public class PlayerMovement : MonoBehaviour {
     /// </summary>
     void Start () {
         rb = GetComponent<Rigidbody2D>();
+        playerData = GetComponent<PlayerData>();
 
         // update player dimensions
         playerBounds = GetComponent<BoxCollider2D>().bounds;
@@ -110,24 +112,28 @@ public class PlayerMovement : MonoBehaviour {
     ///     Handle a jump input from the user.
     /// </summary>
     void handleJumpInput() {
-        if(Input.GetButtonDown("Jump") && inputLockTimer == 0f) {
-            if(grounded) {
-                grounded = false;
-                rb.AddForce(Vector2.up * JUMP_FORCE, ForceMode2D.Impulse);
-            } else if(isOnWall) {
-                if(collisions.right) {
-                    Vector2 upLeft = new Vector2(-1f, 1f) * WALL_JUMP_FORCE;
-                    rb.velocity = upLeft;
-                    inputLockTimer = WALL_JUMP_DELAY_TIMER;
-                } else if(collisions.left) {
-                    Vector2 upRight = new Vector2(1f, 1f) * WALL_JUMP_FORCE;
-                    rb.velocity = upRight;
-                    inputLockTimer = WALL_JUMP_DELAY_TIMER;
+        if(playerData.stamina > 0f) {
+            if(Input.GetButtonDown("Jump") && inputLockTimer == 0f) {
+                if(grounded) {
+                    grounded = false;
+                    rb.AddForce(Vector2.up * JUMP_FORCE, ForceMode2D.Impulse);
+                    playerData.useStamina(20f);
+                } else if(isOnWall) {
+                    if(collisions.right) {
+                        Vector2 upLeft = new Vector2(-1f, 1f) * WALL_JUMP_FORCE;
+                        rb.velocity = upLeft;
+                        inputLockTimer = WALL_JUMP_DELAY_TIMER;
+                    } else if(collisions.left) {
+                        Vector2 upRight = new Vector2(1f, 1f) * WALL_JUMP_FORCE;
+                        rb.velocity = upRight;
+                        inputLockTimer = WALL_JUMP_DELAY_TIMER;
+                    }
+                    playerData.useStamina(20f);
                 }
-            }
-        } else if(Input.GetButtonUp("Jump")) {
-            if(!grounded && rb.velocity.y > 0) {
-                rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / JUMP_FORCE_RELEASE_DIVIDER);
+            } else if(Input.GetButtonUp("Jump")) {
+                if(!grounded && rb.velocity.y > 0) {
+                    rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / JUMP_FORCE_RELEASE_DIVIDER);
+                }
             }
         }
     }
