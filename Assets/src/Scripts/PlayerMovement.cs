@@ -9,7 +9,7 @@ public class PlayerMovement : MonoBehaviour {
     private Bounds playerBounds;
     private Vector2 playerDimensions;
 
-    private const float MAX_PLAYER_FALL_SPEED = -15f;
+    private const float MAX_PLAYER_FALL_SPEED = -18f;
     private const float PLAYER_MOVE_SPEED_FACTOR = 8f;
     private const int LAYER_TERRAIN = 1 << 9;
     private const float GRAVITY_VELOCITY = -40f;
@@ -121,6 +121,16 @@ public class PlayerMovement : MonoBehaviour {
             if(rb.velocity.y <= 0f) {
                 grounded = true;
             }
+
+            // prevent the player from phasing through the ground this frame by only doing this if the collision point and the current transform's 
+            BoxCollider2D otherCollider = (BoxCollider2D)downHit.collider;
+            float otherColliderVerticalRadius = otherCollider.size.y / 2f;
+            float collisionPointToColliderCenterVerticalDistance = Mathf.Abs(downHit.point.y - downHit.collider.gameObject.transform.position.y);
+            if(collisionPointToColliderCenterVerticalDistance <= 0.51f) {
+                Debug.Log("Fixed player pos, y difference was:  " + collisionPointToColliderCenterVerticalDistance);
+                transform.position = new Vector2(transform.position.x, downHit.collider.gameObject.transform.position.y + 1f);
+            }
+
         }
 
         ////////////////////////////////
