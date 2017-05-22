@@ -8,6 +8,7 @@ public class PlayerMovement : MonoBehaviour {
     private CollisionDirections collisions = new CollisionDirections();
     private Bounds playerBounds;
     private Vector2 playerDimensions;
+    private bool isOnWall = false;
 
     private const float MAX_PLAYER_FALL_SPEED = -18f;
     private const float PLAYER_MOVE_SPEED_FACTOR = 8f;
@@ -114,10 +115,8 @@ public class PlayerMovement : MonoBehaviour {
         // down
         grounded = false;
         RaycastHit2D downHit = spawnRaycasts(bottomLeft, bottomRight, Vector2.down);
+        collisions.down = downHit;
         if(downHit) {
-            collisions.down = true;
-            grounded = true;
-
             if(rb.velocity.y <= 0f) {
                 grounded = true;
             }
@@ -127,40 +126,16 @@ public class PlayerMovement : MonoBehaviour {
             float otherColliderVerticalRadius = otherCollider.size.y / 2f;
             float collisionPointToColliderCenterVerticalDistance = Mathf.Abs(downHit.point.y - downHit.collider.gameObject.transform.position.y);
             if(collisionPointToColliderCenterVerticalDistance <= 0.51f) {
-                Debug.Log("Fixed player pos, y difference was:  " + collisionPointToColliderCenterVerticalDistance);
                 transform.position = new Vector2(transform.position.x, downHit.collider.gameObject.transform.position.y + 1f);
             }
-
         }
 
-        ////////////////////////////////
-        // up
-        RaycastHit2D upHit = spawnRaycasts(topLeft, topRight, Vector2.up);
-        if(upHit) {
-            collisions.up = true;
+        // update up, right, left collision states
+        collisions.up = spawnRaycasts(topLeft, topRight, Vector2.up);
+        collisions.right = spawnRaycasts(bottomRight, topRight, Vector2.right);
+        collisions.left = spawnRaycasts(bottomLeft, topLeft, Vector2.left);
 
-            if(rb.velocity.y > 0f) {
-                rb.velocity = new Vector2(rb.velocity.x, 0f);
-                //transform.position = new Vector2(transform.position.x, upHit.collider.gameObject.transform.position.y - 1f);
-            }
-        }
-
-        ////////////////////////////////
-        // right
-        RaycastHit2D rightHit = spawnRaycasts(bottomRight, topRight, Vector2.right);
-        if(rightHit) {
-            Debug.Log("right");
-            collisions.right = true;
-            //transform.position = new Vector2(rightHit.collider.gameObject.transform.position.x - 1f, transform.position.y);
-        }
-
-        ////////////////////////////////
-        // left
-        RaycastHit2D leftHit = spawnRaycasts(bottomLeft, topLeft, Vector2.left);
-        if(leftHit) {
-            Debug.Log("left");
-            collisions.left = true;
-            //transform.position = new Vector2(leftHit.collider.gameObject.transform.position.x + 1f, transform.position.y);
-        }
+        // update on wall state
+        isOnWall = !grounded && (collisions.left || collisions.right);
     }
 }
