@@ -9,6 +9,7 @@ public class PlayerMovement : MonoBehaviour {
     private Bounds playerBounds;
     private Vector2 playerDimensions;
     private bool isOnWall = false;
+    private float wallJumpTimer = 0f;
 
     private const float MAX_PLAYER_FALL_SPEED = -18f;
     private const float MAX_WALL_SLIDE_SPEED = -5f;
@@ -21,9 +22,13 @@ public class PlayerMovement : MonoBehaviour {
     private const float JUMP_FORCE = 16f;
     private const float WALL_JUMP_FORCE = 16f;
     private const float JUMP_FORCE_RELEASE_DIVIDER = 1.5f;
+    private const float WALL_JUMP_DELAY_TIMER = 0.2f;
     
     
-	void Start () {
+	/// <summary>
+    ///     START
+    /// </summary>
+    void Start () {
         rb = GetComponent<Rigidbody2D>();
 
         // update player dimensions
@@ -31,12 +36,26 @@ public class PlayerMovement : MonoBehaviour {
         playerDimensions = new Vector2(playerBounds.max.x - playerBounds.min.x, playerBounds.max.y - playerBounds.min.y);
 	}
 
+    /// <summary>
+    ///     FIXED UPDATE
+    /// </summary>
     void FixedUpdate() {
         applyGravity();
+
+        // manage wall jump delay timer
+        if(wallJumpTimer > 0f) {
+            wallJumpTimer -= Time.deltaTime;
+
+            if(wallJumpTimer <= 0f) {
+                wallJumpTimer = 0f;
+            }
+        }
     }
 
+    /// <summary>
+    ///     UPDATE
+    /// </summary>
 	void Update () {
-        // TODO maybe some of this logic should be directly in here.
         updateCollisions();
         handleMoveInput();
         handleJumpInput();
@@ -47,22 +66,15 @@ public class PlayerMovement : MonoBehaviour {
     ///     Handle a move input from the user.
     /// </summary>
     void handleMoveInput() {
-        if(Input.GetAxisRaw("Horizontal") != 0) {
+        if(Input.GetAxisRaw("Horizontal") != 0 && wallJumpTimer == 0f) {
             if(Input.GetAxisRaw("Horizontal") > 0 && !collisions.right) {
-                rb.AddForce(Vector2.right * PLAYER_MOVE_SPEED_FACTOR * Time.deltaTime);
-                //transform.Translate(Vector2.right * PLAYER_MOVE_SPEED_FACTOR * Time.deltaTime);
+                rb.velocity = new Vector2(15f, rb.velocity.y);
             } else if(Input.GetAxisRaw("Horizontal") < 0 && !collisions.left) {
-                rb.AddForce(Vector2.left * PLAYER_MOVE_SPEED_FACTOR * Time.deltaTime);
-                //transform.Translate(Vector2.left * PLAYER_MOVE_SPEED_FACTOR * Time.deltaTime);
+                rb.velocity = new Vector2(-15f, rb.velocity.y);
             }
         } else {
-            if(grounded) {
+            if(wallJumpTimer == 0) {
                 rb.velocity = new Vector2(rb.velocity.x / 1.2f, rb.velocity.y);
-                if(Mathf.Abs(rb.velocity.x) < 0.1f) {
-                    rb.velocity = new Vector2(0f, rb.velocity.y);
-                }
-            } else {
-                rb.velocity = new Vector2(rb.velocity.x / 1.01f, rb.velocity.y);
                 if(Mathf.Abs(rb.velocity.x) < 0.1f) {
                     rb.velocity = new Vector2(0f, rb.velocity.y);
                 }
@@ -81,10 +93,12 @@ public class PlayerMovement : MonoBehaviour {
             } else if(isOnWall) {
                 if(collisions.right) {
                     Vector2 upLeft = new Vector2(-1f, 1f) * WALL_JUMP_FORCE;
-                    rb.AddForce(upLeft, ForceMode2D.Impulse);
+                    rb.velocity = upLeft;
+                    wallJumpTimer = WALL_JUMP_DELAY_TIMER;
                 } else if(collisions.left) {
                     Vector2 upRight = new Vector2(1f, 1f) * WALL_JUMP_FORCE;
-                    rb.AddForce(upRight, ForceMode2D.Impulse);
+                    rb.velocity = upRight;
+                    wallJumpTimer = WALL_JUMP_DELAY_TIMER;
                 }
             }
         } else if(Input.GetButtonUp("Jump")) {
@@ -189,8 +203,12 @@ public class PlayerMovement : MonoBehaviour {
             float otherColliderVerticalRadius = otherCollider.size.y / 2f;
             float collisionPointToColliderCenterVerticalDistance = Mathf.Abs(downHit.point.y - downHit.collider.gameObject.transform.position.y);
             float collisionPointToColliderCenterHorizontalDistance = Mathf.Abs(downHit.point.x - downHit.collider.gameObject.transform.position.x);
-            if(collisionPointToColliderCenterVerticalDistance <= 0.51f && collisionPointToColliderCenterHorizontalDistance <= 0.51f) {
-                transform.position = new Vector2(transform.position.x, downHit.collider.gameObject.transform.position.y + 1f);
+            float arbitraryThresholdForVerticalPositionFix = -10f;
+
+            if(collisionPointToColliderCenterVerticalDistance <= 0.51f 
+                && collisionPointToColliderCenterHorizontalDistance <= 0.51f 
+                && rb.velocity.y <= arbitraryThresholdForVerticalPositionFix) {
+                    transform.position = new Vector2(transform.position.x, downHit.collider.gameObject.transform.position.y + 1f);
             }
         }
 
