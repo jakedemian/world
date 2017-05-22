@@ -188,7 +188,8 @@ public class PlayerMovement : MonoBehaviour {
             BoxCollider2D otherCollider = (BoxCollider2D)downHit.collider;
             float otherColliderVerticalRadius = otherCollider.size.y / 2f;
             float collisionPointToColliderCenterVerticalDistance = Mathf.Abs(downHit.point.y - downHit.collider.gameObject.transform.position.y);
-            if(collisionPointToColliderCenterVerticalDistance <= 0.51f) {
+            float collisionPointToColliderCenterHorizontalDistance = Mathf.Abs(downHit.point.x - downHit.collider.gameObject.transform.position.x);
+            if(collisionPointToColliderCenterVerticalDistance <= 0.51f && collisionPointToColliderCenterHorizontalDistance <= 0.51f) {
                 transform.position = new Vector2(transform.position.x, downHit.collider.gameObject.transform.position.y + 1f);
             }
         }
