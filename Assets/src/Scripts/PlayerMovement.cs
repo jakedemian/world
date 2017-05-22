@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour {
+
+    [HideInInspector]
+    public bool grounded = false;
+
     private Rigidbody2D rb;
-    private bool grounded = false;
     private CollisionDirections collisions = new CollisionDirections();
     private Bounds playerBounds;
     private Vector2 playerDimensions;
