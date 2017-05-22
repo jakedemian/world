@@ -16,15 +16,22 @@ public class PlayerMovement : MonoBehaviour {
 
     private const float MAX_PLAYER_FALL_SPEED = -18f;
     private const float MAX_WALL_SLIDE_SPEED = -5f;
-    private const float PLAYER_MOVE_SPEED_FACTOR = 3000f;
-    private const float MAX_PLAYER_MOVE_SPEED = 7f;
+
+    private const float PLAYER_MOVE_SPEED = 7f;
+    private const float PLAYER_SPRINT_SPEED = 10f;
+    private const float MAX_PLAYER_MOVE_SPEED = 15f;
     private const float MAX_PLAYER_MOVE_SPEED_AIR = 10f;
+
     private const int LAYER_TERRAIN = 1 << 9;
+
     private const float GRAVITY_VELOCITY = -40f;
     private const float WALL_SLIDE_GRAVITY_VELOCITY = -15f;
+
     private const float JUMP_FORCE = 16f;
     private const float WALL_JUMP_FORCE = 16f;
+
     private const float JUMP_FORCE_RELEASE_DIVIDER = 1.5f;
+
     private const float WALL_JUMP_DELAY_TIMER = 0.2f;
     
     
@@ -70,10 +77,11 @@ public class PlayerMovement : MonoBehaviour {
     /// </summary>
     void handleMoveInput() {
         if(Input.GetAxisRaw("Horizontal") != 0 && wallJumpTimer == 0f) {
+            float speed = Input.GetAxis("Sprint") != 0 ? PLAYER_SPRINT_SPEED : PLAYER_MOVE_SPEED;
             if(Input.GetAxisRaw("Horizontal") > 0 && !collisions.right) {
-                rb.velocity = new Vector2(15f, rb.velocity.y);
+                rb.velocity = new Vector2(speed, rb.velocity.y);
             } else if(Input.GetAxisRaw("Horizontal") < 0 && !collisions.left) {
-                rb.velocity = new Vector2(-15f, rb.velocity.y);
+                rb.velocity = new Vector2(-speed, rb.velocity.y);
             }
         } else {
             if(wallJumpTimer == 0) {
