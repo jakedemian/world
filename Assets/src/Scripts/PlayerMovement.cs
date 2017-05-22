@@ -12,11 +12,14 @@ public class PlayerMovement : MonoBehaviour {
 
     private const float MAX_PLAYER_FALL_SPEED = -18f;
     private const float MAX_WALL_SLIDE_SPEED = -5f;
-    private const float PLAYER_MOVE_SPEED_FACTOR = 8f;
+    private const float PLAYER_MOVE_SPEED_FACTOR = 3000f;
+    private const float MAX_PLAYER_MOVE_SPEED = 7f;
+    private const float MAX_PLAYER_MOVE_SPEED_AIR = 10f;
     private const int LAYER_TERRAIN = 1 << 9;
     private const float GRAVITY_VELOCITY = -40f;
     private const float WALL_SLIDE_GRAVITY_VELOCITY = -15f;
     private const float JUMP_FORCE = 16f;
+    private const float WALL_JUMP_FORCE = 16f;
     private const float JUMP_FORCE_RELEASE_DIVIDER = 1.5f;
     
     
@@ -37,26 +40,38 @@ public class PlayerMovement : MonoBehaviour {
         updateCollisions();
         handleMoveInput();
         handleJumpInput();
-        capPlayerFallSpeed();
+        capPlayerSpeed();
     }
 
     /// <summary>
-    /// Handle a move input from the user.
+    ///     Handle a move input from the user.
     /// </summary>
     void handleMoveInput() {
         if(Input.GetAxisRaw("Horizontal") != 0) {
             if(Input.GetAxisRaw("Horizontal") > 0 && !collisions.right) {
-                transform.Translate(Vector2.right * PLAYER_MOVE_SPEED_FACTOR * Time.deltaTime);
+                rb.AddForce(Vector2.right * PLAYER_MOVE_SPEED_FACTOR * Time.deltaTime);
+                //transform.Translate(Vector2.right * PLAYER_MOVE_SPEED_FACTOR * Time.deltaTime);
             } else if(Input.GetAxisRaw("Horizontal") < 0 && !collisions.left) {
-                transform.Translate(Vector2.left * PLAYER_MOVE_SPEED_FACTOR * Time.deltaTime);
+                rb.AddForce(Vector2.left * PLAYER_MOVE_SPEED_FACTOR * Time.deltaTime);
+                //transform.Translate(Vector2.left * PLAYER_MOVE_SPEED_FACTOR * Time.deltaTime);
             }
         } else {
-
+            if(grounded) {
+                rb.velocity = new Vector2(rb.velocity.x / 1.2f, rb.velocity.y);
+                if(Mathf.Abs(rb.velocity.x) < 0.1f) {
+                    rb.velocity = new Vector2(0f, rb.velocity.y);
+                }
+            } else {
+                rb.velocity = new Vector2(rb.velocity.x / 1.01f, rb.velocity.y);
+                if(Mathf.Abs(rb.velocity.x) < 0.1f) {
+                    rb.velocity = new Vector2(0f, rb.velocity.y);
+                }
+            }
         }
     }
 
     /// <summary>
-    /// Handle a jump input from the user.
+    ///     Handle a jump input from the user.
     /// </summary>
     void handleJumpInput() {
         if(Input.GetButtonDown("Jump")) {
@@ -65,10 +80,10 @@ public class PlayerMovement : MonoBehaviour {
                 rb.AddForce(Vector2.up * JUMP_FORCE, ForceMode2D.Impulse);
             } else if(isOnWall) {
                 if(collisions.right) {
-                    Vector2 upLeft = new Vector2(-0.6f, 1f) * JUMP_FORCE;
+                    Vector2 upLeft = new Vector2(-1f, 1f) * WALL_JUMP_FORCE;
                     rb.AddForce(upLeft, ForceMode2D.Impulse);
                 } else if(collisions.left) {
-                    Vector2 upRight = new Vector2(0.6f, 1f) * JUMP_FORCE;
+                    Vector2 upRight = new Vector2(1f, 1f) * WALL_JUMP_FORCE;
                     rb.AddForce(upRight, ForceMode2D.Impulse);
                 }
             }
@@ -80,11 +95,10 @@ public class PlayerMovement : MonoBehaviour {
     }
 
     /// <summary>
-    /// Max out the player's fall speed
-
-    /// TODO make this capPlayerSpeed, and cap ALL player speed individually.
+    ///     Max out the player's speed
     /// </summary>
-    void capPlayerFallSpeed() {
+    void capPlayerSpeed() {
+        // fall speed
         if(isOnWall) {
             if(rb.velocity.y < MAX_WALL_SLIDE_SPEED) {
                 rb.velocity = new Vector2(rb.velocity.x, MAX_WALL_SLIDE_SPEED);
@@ -95,13 +109,28 @@ public class PlayerMovement : MonoBehaviour {
             }
         }
 
+        // grounded move speed
+        if(grounded) {
+            if(rb.velocity.x > MAX_PLAYER_MOVE_SPEED) {
+                rb.velocity = new Vector2(MAX_PLAYER_MOVE_SPEED, rb.velocity.y);
+            } else if(rb.velocity.x < -MAX_PLAYER_MOVE_SPEED) {
+                rb.velocity = new Vector2(-MAX_PLAYER_MOVE_SPEED, rb.velocity.y);
+            }
+        } else {
+            if(rb.velocity.x > MAX_PLAYER_MOVE_SPEED_AIR) {
+                rb.velocity = new Vector2(MAX_PLAYER_MOVE_SPEED_AIR, rb.velocity.y);
+            } else if(rb.velocity.x < -MAX_PLAYER_MOVE_SPEED_AIR) {
+                rb.velocity = new Vector2(-MAX_PLAYER_MOVE_SPEED_AIR, rb.velocity.y);
+            }
+        }
+
         if(collisions.down && rb.velocity.y < 0f) {
             rb.velocity = new Vector2(rb.velocity.x, 0f);
         }
     }
 
     /// <summary>
-    /// Apply the gravity force to the player for this frame, if necessary and depending on current player state.
+    ///     Apply the gravity force to the player for this frame, if necessary and depending on current player state.
     /// </summary>
     void applyGravity() {
         if(!grounded) {
