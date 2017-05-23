@@ -105,9 +105,9 @@ public class PlayerMovement : MonoBehaviour {
 
             if(grounded) {
                 if(speed == PLAYER_SPRINT_SPEED) {
-                    soundCtrl.startFootsteps(PlayerSoundController.FOOTSTEP_TYPE_SPRINT, "Snow", transform);
+                    soundCtrl.startFootsteps(PlayerSoundController.FOOTSTEP_TYPE_SPRINT, collisions.downCollisionObj.tag, transform);
                 } else {
-                    soundCtrl.startFootsteps(PlayerSoundController.FOOTSTEP_TYPE_JOG, "Snow", transform);
+                    soundCtrl.startFootsteps(PlayerSoundController.FOOTSTEP_TYPE_JOG, collisions.downCollisionObj.tag, transform);
                 }
             }
 
@@ -255,6 +255,8 @@ public class PlayerMovement : MonoBehaviour {
                 grounded = true;
             }
 
+            collisions.downCollisionObj = downHit.collider.gameObject;
+
             // prevent the player from phasing through the ground this frame by only doing this if the collision point and the current transform's 
             BoxCollider2D otherCollider = (BoxCollider2D)downHit.collider;
             float otherColliderVerticalRadius = otherCollider.size.y / 2f;
@@ -269,10 +271,26 @@ public class PlayerMovement : MonoBehaviour {
             }
         }
 
-        // update up, right, left collision states
-        collisions.up = spawnRaycasts(topLeft, topRight, Vector2.up);
-        collisions.right = spawnRaycasts(bottomRight, topRight, Vector2.right);
-        collisions.left = spawnRaycasts(bottomLeft, topLeft, Vector2.left);
+        // up
+        RaycastHit2D upHit = spawnRaycasts(topLeft, topRight, Vector2.up);
+        collisions.up = upHit;
+        if(collisions.up) {
+            collisions.upCollisionObj = upHit.collider.gameObject;
+        }
+
+        // right
+        RaycastHit2D rightHit = spawnRaycasts(bottomRight, topRight, Vector2.right);
+        collisions.right = rightHit;
+        if(collisions.right) {
+            collisions.rightCollisionObj = rightHit.collider.gameObject;
+        }
+
+        // left
+        RaycastHit2D leftHit = spawnRaycasts(bottomLeft, topLeft, Vector2.left);
+        collisions.left = leftHit;
+        if(collisions.left) {
+            collisions.leftCollisionObj = leftHit.collider.gameObject;
+        }
 
         // update on wall state
         isOnWall = !grounded && (collisions.left || collisions.right);

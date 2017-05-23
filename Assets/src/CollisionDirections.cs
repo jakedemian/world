@@ -8,10 +8,10 @@ public class CollisionDirections {
     public bool up = false;
     public bool down = false;
 
-    public GameObject rightCollision;
-    public GameObject leftCollision;
-    public GameObject upCollision;
-    public GameObject downCollision;
+    public GameObject rightCollisionObj;
+    public GameObject leftCollisionObj;
+    public GameObject upCollisionObj;
+    public GameObject downCollisionObj;
 
     public void clear() {
         right = false;
@@ -19,9 +19,9 @@ public class CollisionDirections {
         up = false;
         down = false;
 
-        rightCollision = null;
-        leftCollision = null;
-        upCollision = null;
-        downCollision = null;
+        rightCollisionObj = null;
+        leftCollisionObj = null;
+        upCollisionObj = null;
+        downCollisionObj = null;
     }
 }
