@@ -23,6 +23,16 @@ public class UIController : MonoBehaviour {
         playerStamBlockList = new List<GameObject>();
     }
 
+    void Update() {
+        if(Input.GetKeyDown(KeyCode.Q)) {
+            Application.Quit();
+        }
+
+        if(Input.GetKeyDown(KeyCode.R)) {
+            Application.LoadLevel("test_scene");
+        }
+    }
+
     void OnGUI() {
         playerHealth = player.GetComponent<PlayerData>().health;
         playerStamina = player.GetComponent<PlayerData>().stamina;
