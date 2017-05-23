@@ -92,7 +92,10 @@ public class PlayerMovement : MonoBehaviour {
     /// </summary>
     void handleMoveInput() {
         if(Input.GetAxisRaw("Horizontal") != 0 && inputLockTimer == 0f) {
-            float speed = Input.GetAxis("Sprint") != 0 ? PLAYER_SPRINT_SPEED : PLAYER_MOVE_SPEED;
+            float speed = Input.GetAxis("Sprint") != 0 && playerData.stamina > 0f ? PLAYER_SPRINT_SPEED : PLAYER_MOVE_SPEED;
+            if(speed == PLAYER_SPRINT_SPEED) {
+                playerData.useStamina(12f * Time.deltaTime);
+            }
             if(Input.GetAxisRaw("Horizontal") > 0 && !collisions.right) {
                 rb.velocity = new Vector2(speed, rb.velocity.y);
             } else if(Input.GetAxisRaw("Horizontal") < 0 && !collisions.left) {
@@ -139,9 +142,10 @@ public class PlayerMovement : MonoBehaviour {
     }
 
     void handleRollInput() {
-        if(Input.GetButtonDown("Roll") && grounded && inputLockTimer == 0f) {
+        if(Input.GetButtonDown("Roll") && grounded && inputLockTimer == 0f && playerData.stamina > 0f) {
             inputLockTimer = ROLL_DELAY_TIMER;
             rb.velocity = new Vector2(currentFacingDirection * PLAYER_ROLL_SPEED, rb.velocity.y);
+            playerData.useStamina(20f);
         }
     }
 
