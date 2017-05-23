@@ -135,16 +135,19 @@ public class PlayerMovement : MonoBehaviour {
                 if(grounded) {
                     grounded = false;
                     rb.AddForce(Vector2.up * JUMP_FORCE, ForceMode2D.Impulse);
+                    soundCtrl.playJumpSound(collisions.downCollisionObj.tag, transform);
                     playerData.useStamina(20f);
                 } else if(isOnWall) {
                     if(collisions.right) {
                         Vector2 upLeft = new Vector2(-1f, 1f) * WALL_JUMP_FORCE;
                         rb.velocity = upLeft;
                         inputLockTimer = WALL_JUMP_DELAY_TIMER;
+                        soundCtrl.playJumpSound(collisions.rightCollisionObj.tag, transform);
                     } else if(collisions.left) {
                         Vector2 upRight = new Vector2(1f, 1f) * WALL_JUMP_FORCE;
                         rb.velocity = upRight;
                         inputLockTimer = WALL_JUMP_DELAY_TIMER;
+                        soundCtrl.playJumpSound(collisions.leftCollisionObj.tag, transform);
                     }
                     playerData.useStamina(20f);
                 }

@@ -486,6 +486,10 @@ Prefab:
       propertyPath: m_LocalScale.y
       value: 12.58
       objectReference: {fileID: 0}
+    - target: {fileID: 1121187835328758, guid: a5e5101599e167142a0f3155f8b05bd7, type: 2}
+      propertyPath: m_TagString
+      value: Snow
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: a5e5101599e167142a0f3155f8b05bd7, type: 2}
   m_IsPrefabParent: 0
@@ -974,6 +978,10 @@ Prefab:
     - target: {fileID: 4039130388926586, guid: a5e5101599e167142a0f3155f8b05bd7, type: 2}
       propertyPath: m_LocalScale.y
       value: 12.58
+      objectReference: {fileID: 0}
+    - target: {fileID: 1121187835328758, guid: a5e5101599e167142a0f3155f8b05bd7, type: 2}
+      propertyPath: m_TagString
+      value: Snow
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: a5e5101599e167142a0f3155f8b05bd7, type: 2}

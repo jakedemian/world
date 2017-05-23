@@ -27,6 +27,18 @@ public class PlayerSoundController : MonoBehaviour {
         footstepTimer = 0f;
     }
 
+    public void playJumpSound(string blockTag, Transform playerTrans) {
+        footstepBlockTag = blockTag;
+        playerTransform = playerTrans;
+        playSingleFootstep();
+    }
+
+    public void playLandSound(string blockTag, Transform playerTrans) {
+        footstepBlockTag = blockTag;
+        playerTransform = playerTrans;
+        playSingleFootstep();
+    }
+
     void FixedUpdate() {
         if(footsteps) {
             footstepTimer -= Time.deltaTime;
