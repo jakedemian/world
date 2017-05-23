@@ -8,6 +8,7 @@ public class PlayerMovement : MonoBehaviour {
     public bool grounded = false;
 
     private Rigidbody2D rb;
+    private PlayerSoundController soundCtrl;
     private CollisionDirections collisions = new CollisionDirections();
     private Bounds playerBounds;
     private Vector2 playerDimensions;
@@ -44,6 +45,7 @@ public class PlayerMovement : MonoBehaviour {
     void Start () {
         rb = GetComponent<Rigidbody2D>();
         playerData = GetComponent<PlayerData>();
+        soundCtrl = GetComponent<PlayerSoundController>();
 
         // update player dimensions
         playerBounds = GetComponent<BoxCollider2D>().bounds;
@@ -79,6 +81,10 @@ public class PlayerMovement : MonoBehaviour {
         } else if(rb.velocity.x > 0) {
             currentFacingDirection = 1;
         }
+
+        if(!grounded || rb.velocity.x == 0f) {
+            soundCtrl.stopFootsteps();
+        }
     }
 
     void handleUserInput() {
@@ -96,6 +102,15 @@ public class PlayerMovement : MonoBehaviour {
             if(speed == PLAYER_SPRINT_SPEED) {
                 playerData.useStamina(12f * Time.deltaTime);
             }
+
+            if(grounded) {
+                if(speed == PLAYER_SPRINT_SPEED) {
+                    soundCtrl.startFootsteps(PlayerSoundController.FOOTSTEP_TYPE_SPRINT, "Snow", transform);
+                } else {
+                    soundCtrl.startFootsteps(PlayerSoundController.FOOTSTEP_TYPE_JOG, "Snow", transform);
+                }
+            }
+
             if(Input.GetAxisRaw("Horizontal") > 0 && !collisions.right) {
                 rb.velocity = new Vector2(speed, rb.velocity.y);
             } else if(Input.GetAxisRaw("Horizontal") < 0 && !collisions.left) {
@@ -146,6 +161,7 @@ public class PlayerMovement : MonoBehaviour {
             inputLockTimer = ROLL_DELAY_TIMER;
             rb.velocity = new Vector2(currentFacingDirection * PLAYER_ROLL_SPEED, rb.velocity.y);
             playerData.useStamina(20f);
+            soundCtrl.stopFootsteps();
         }
     }
 
