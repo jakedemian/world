@@ -7,6 +7,9 @@ public class PlayerMovement : MonoBehaviour {
     [HideInInspector]
     public bool grounded = false;
 
+    [HideInInspector]
+    public float currentFacingDirection = 1; // 1 = right, -1 = left.  cannot be 0
+
     private Rigidbody2D rb;
     private PlayerSoundController soundCtrl;
     private CollisionDirections collisions = new CollisionDirections();
@@ -14,13 +17,13 @@ public class PlayerMovement : MonoBehaviour {
     private Vector2 playerDimensions;
     private bool isOnWall = false;
     private float inputLockTimer = 0f;
-    private float currentFacingDirection = 1; // 1 = right, -1 = left.  cannot be 0
     private PlayerData playerData;
 
     private const float MAX_PLAYER_FALL_SPEED = -18f;
     private const float MAX_WALL_SLIDE_SPEED = -7f;
 
     private const float PLAYER_MOVE_SPEED = 7f;
+    private const float PLAYER_MIN_MOVE_SPEED = 3f;
     private const float PLAYER_SPRINT_SPEED = 10f;
     private const float PLAYER_ROLL_SPEED = 15f;
     private const float MAX_PLAYER_MOVE_SPEED = 15f;
@@ -97,25 +100,36 @@ public class PlayerMovement : MonoBehaviour {
     ///     Handle a move input from the user.
     /// </summary>
     void handleMoveInput() {
-        if(Input.GetAxisRaw("Horizontal") != 0 && inputLockTimer == 0f) {
-            float speed = Input.GetAxis("Sprint") != 0 && playerData.stamina > 0f ? PLAYER_SPRINT_SPEED : PLAYER_MOVE_SPEED;
-            if(speed == PLAYER_SPRINT_SPEED) {
+        if(Input.GetAxis("Horizontal") != 0 && inputLockTimer == 0f) {
+            // set the speed based on whether or not the player is sprinting
+            float speed = 0f;
+            if(Input.GetAxis("Sprint") != 0 && playerData.stamina > 0f) {
+                // sprint
+                int dir = Input.GetAxis("Horizontal") > 0 ? 1 : -1;
+                speed = PLAYER_SPRINT_SPEED * dir;
                 playerData.useStamina(12f * Time.deltaTime);
-            }
 
-            if(grounded) {
-                if(speed == PLAYER_SPRINT_SPEED) {
+                if(grounded) {
                     soundCtrl.startFootsteps(PlayerSoundController.FOOTSTEP_TYPE_SPRINT, collisions.downCollisionObj.tag, transform);
-                } else {
+                }
+            } else {
+                // walk / jog
+                speed = PLAYER_MOVE_SPEED * Input.GetAxis("Horizontal");
+
+                if(grounded) {
                     soundCtrl.startFootsteps(PlayerSoundController.FOOTSTEP_TYPE_JOG, collisions.downCollisionObj.tag, transform);
+                }
+
+                // if not sprinting, we don't want the player to go TOO slow, so limit that
+                if(Mathf.Abs(speed) < PLAYER_MIN_MOVE_SPEED) {
+                    speed = speed > 0 ? PLAYER_MIN_MOVE_SPEED : -PLAYER_MIN_MOVE_SPEED;
                 }
             }
 
-            if(Input.GetAxisRaw("Horizontal") > 0 && !collisions.right) {
+            if(Input.GetAxisRaw("Horizontal") > 0 && !collisions.right 
+            || Input.GetAxisRaw("Horizontal") < 0 && !collisions.left) {
                 rb.velocity = new Vector2(speed, rb.velocity.y);
-            } else if(Input.GetAxisRaw("Horizontal") < 0 && !collisions.left) {
-                rb.velocity = new Vector2(-speed, rb.velocity.y);
-            }
+            } 
         } else {
             if(inputLockTimer == 0) {
                 rb.velocity = new Vector2(rb.velocity.x / 1.2f, rb.velocity.y);
@@ -298,4 +312,5 @@ public class PlayerMovement : MonoBehaviour {
         // update on wall state
         isOnWall = !grounded && (collisions.left || collisions.right);
     }
+    
 }

@@ -1576,6 +1576,7 @@ GameObject:
   - component: {fileID: 1454995975}
   - component: {fileID: 1454995976}
   - component: {fileID: 1454995977}
+  - component: {fileID: 1454995978}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -1595,6 +1596,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   grounded: 0
+  currentFacingDirection: 1
 --- !u!212 &1454995972
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -1724,6 +1726,19 @@ MonoBehaviour:
   - {fileID: 8300000, guid: d9d71ebc59771ec4ca166d32ed1b2b0f, type: 3}
   - {fileID: 8300000, guid: 0d2db6f2a92152d45b3b5343346c73d0, type: 3}
   - {fileID: 8300000, guid: b060b2c56be6fdd47a3a505ccf4bad64, type: 3}
+--- !u!114 &1454995978
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1454995970}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2c0faf74713a614db4c8b5b73a0456c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  swordSlashPrefabs:
+  - {fileID: 1575297542132808, guid: 9d20ea4e7507daa468f688a5c1289c4f, type: 2}
 --- !u!4 &1472736606 stripped
 Transform:
   m_PrefabParentObject: {fileID: 4039130388926586, guid: a5e5101599e167142a0f3155f8b05bd7,
