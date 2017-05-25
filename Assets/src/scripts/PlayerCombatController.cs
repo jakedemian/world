@@ -11,6 +11,7 @@ public class PlayerCombatController : MonoBehaviour {
     public GameObject isShieldActive;
 
     private GameObject currentSwordSlash = null;
+    private Vector2 slashRelativePosToPlayer = new Vector2(0f, 0f);
 
     private PlayerData playerData;
     private PlayerMovement playerMovement;
@@ -140,11 +141,24 @@ public class PlayerCombatController : MonoBehaviour {
         int slashIdx = Random.Range(0, swordSlashPrefabs.Count);
 
         playerData.useStamina(20f);
-        if(playerMovement.currentFacingDirection == 1) {
-            currentSwordSlash = Instantiate(swordSlashPrefabs[slashIdx], new Vector2(transform.position.x + swingDistanceFromPlayer, transform.position.y), Quaternion.identity);
+        string analogPrimaryDir = getPrimaryAnalogStickDirection();
+        if(analogPrimaryDir.Equals("up") || analogPrimaryDir.Equals("down")) {
+            if(analogPrimaryDir.Equals("up")) {
+                slashRelativePosToPlayer = new Vector2(0f, swingDistanceFromPlayer);
+                currentSwordSlash = Instantiate(swordSlashPrefabs[slashIdx], new Vector2(transform.position.x, transform.position.y + swingDistanceFromPlayer), Quaternion.Euler(0, 0, 90));
+            } else {
+                slashRelativePosToPlayer = new Vector2(0f, -swingDistanceFromPlayer);
+                currentSwordSlash = Instantiate(swordSlashPrefabs[slashIdx], new Vector2(transform.position.x, transform.position.y - swingDistanceFromPlayer), Quaternion.Euler(0, 0, -90));
+            }
         } else {
-            currentSwordSlash = Instantiate(swordSlashPrefabs[slashIdx], new Vector2(transform.position.x - swingDistanceFromPlayer, transform.position.y), Quaternion.identity);
-            currentSwordSlash.transform.localScale = new Vector2(-1f, currentSwordSlash.transform.localScale.y);
+            if(playerMovement.currentFacingDirection == 1) {
+                slashRelativePosToPlayer = new Vector2(swingDistanceFromPlayer, 0f);
+                currentSwordSlash = Instantiate(swordSlashPrefabs[slashIdx], new Vector2(transform.position.x + swingDistanceFromPlayer, transform.position.y), Quaternion.identity);
+            } else {
+                slashRelativePosToPlayer = new Vector2(-swingDistanceFromPlayer, 0f);
+                currentSwordSlash = Instantiate(swordSlashPrefabs[slashIdx], new Vector2(transform.position.x - swingDistanceFromPlayer, transform.position.y), Quaternion.identity);
+                currentSwordSlash.transform.localScale = new Vector2(-1f, currentSwordSlash.transform.localScale.y);
+            }
         }
     }
 
@@ -153,12 +167,32 @@ public class PlayerCombatController : MonoBehaviour {
     /// </summary>
     private void updateSlashPosition() {
         if(currentSwordSlash != null) {
-            if(playerMovement.currentFacingDirection == 1) {
-                currentSwordSlash.transform.position = new Vector2(transform.position.x + swingDistanceFromPlayer, transform.position.y);
-            } else {
-                currentSwordSlash.transform.position = new Vector2(transform.position.x - swingDistanceFromPlayer, transform.position.y);
+            currentSwordSlash.transform.position = new Vector2(transform.position.x + slashRelativePosToPlayer.x, transform.position.y + slashRelativePosToPlayer.y);
+        }
+    }
+
+    private string getPrimaryAnalogStickDirection() {
+        float h = Input.GetAxis("Horizontal");
+        float v = Input.GetAxis("Vertical");
+
+        string dir = "";
+        if(Mathf.Abs(h) > Mathf.Abs(v)) {
+            // horizontal primary
+            if(h > 0) {
+                dir = "right";
+            } else if (h < 0) {
+                dir = "left";
+            }
+        } else if(Mathf.Abs(h) < Mathf.Abs(v)) {
+            // vertical primary
+            if(v > 0) {
+                dir = "up";
+            } else if (v < 0) {
+                dir = "down";
             }
         }
+
+        return dir;
     }
 
 	
