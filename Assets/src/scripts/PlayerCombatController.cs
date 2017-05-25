@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerCombatController : MonoBehaviour {
-
     public List<GameObject> swordSlashPrefabs;
     public GameObject equippedShieldPrefab;
 
@@ -17,32 +16,12 @@ public class PlayerCombatController : MonoBehaviour {
     private PlayerMovement playerMovement;
     private bool shieldIsUp = false;
 
-
-
-    // swing states ////////////////////////////////////////
     private int swingState = 0;
     private float swingTimer = 0f;
-
-    private const int SWING_STATE_NONE = 0;
-    private const int SWING_STATE_PRESWING = 1;
-    private const int SWING_STATE_SWING = 2;
-    private const int SWING_STATE_POSTSWING = 3;
-
-    private float swordPreSwingDelay = 0.1f;
-    private float swingTime = 0.1f;
-    private float swordPostSwingDelay = 0.1f;
-    private float swingWidth = 1f;
-    private float swingDistanceFromPlayer = 1.5f;
-    //////////////////////////////////////////////
-
-
-
-
-    ///// TODO ///////////////////////////////////
-    private float shieldDistanceFromPlayer = 1f;
-    //////////////////////////////////////////////
-
+    private SwordData swordData = new SwordData();
     
+    // TODO FIXME do the same thing with shields as i did with swords
+    private float shieldDistanceFromPlayer = 1f;
 
 
     /// <summary>
@@ -79,9 +58,9 @@ public class PlayerCombatController : MonoBehaviour {
         }
 
         // sword
-        if(Input.GetButtonDown("Swing") && playerData.stamina > 0f && currentSwordSlash == null && !isShieldActive && swingState == SWING_STATE_NONE) {
-            swingState = SWING_STATE_PRESWING;
-            swingTimer = swordPreSwingDelay;
+        if(Input.GetButtonDown("Swing") && playerData.stamina > 0f && currentSwordSlash == null && !isShieldActive && swingState == SwordData.SWING_STATE_NONE) {
+            swingState = SwordData.SWING_STATE_PRESWING;
+            swingTimer = swordData.getSwordPreSwingDelay();
             playerMovement.playerLocked = true;
         }
 
@@ -93,7 +72,7 @@ public class PlayerCombatController : MonoBehaviour {
     ///     FIXED UPDATE
     /// </summary>
     void FixedUpdate() {
-        if(swingState != SWING_STATE_NONE) {
+        if(swingState != SwordData.SWING_STATE_NONE) {
             swingTimer -= Time.deltaTime;
             manageSwingState();
         }
@@ -104,17 +83,17 @@ public class PlayerCombatController : MonoBehaviour {
     /// </summary>
     private void manageSwingState() {
         if(swingTimer <= 0) {
-            if(swingState == SWING_STATE_PRESWING) {
-                swingState = SWING_STATE_SWING;
-                swingTimer = swingTime;
+            if(swingState == SwordData.SWING_STATE_PRESWING) {
+                swingState = SwordData.SWING_STATE_SWING;
+                swingTimer = swordData.getSwordSwingTime();
 
                 swingSword();
-            } else if(swingState == SWING_STATE_SWING) {
-                swingState = SWING_STATE_POSTSWING;
-                swingTimer = swordPostSwingDelay;
+            } else if(swingState == SwordData.SWING_STATE_SWING) {
+                swingState = SwordData.SWING_STATE_POSTSWING;
+                swingTimer = swordData.getSwordPostSwingDelay();
 
-            } else if(swingState == SWING_STATE_POSTSWING) {
-                swingState = SWING_STATE_NONE;
+            } else if(swingState == SwordData.SWING_STATE_POSTSWING) {
+                swingState = SwordData.SWING_STATE_NONE;
                 swingTimer = 0f;
                 playerMovement.playerLocked = false;
             }
@@ -144,19 +123,19 @@ public class PlayerCombatController : MonoBehaviour {
         string analogPrimaryDir = getPrimaryAnalogStickDirection();
         if(analogPrimaryDir.Equals("up") || analogPrimaryDir.Equals("down")) {
             if(analogPrimaryDir.Equals("up")) {
-                slashRelativePosToPlayer = new Vector2(0f, swingDistanceFromPlayer);
-                currentSwordSlash = Instantiate(swordSlashPrefabs[slashIdx], new Vector2(transform.position.x, transform.position.y + swingDistanceFromPlayer), Quaternion.Euler(0, 0, 90));
+                slashRelativePosToPlayer = new Vector2(0f, swordData.getSwordSwingDistanceFromPlayer());
+                currentSwordSlash = Instantiate(swordSlashPrefabs[slashIdx], new Vector2(transform.position.x, transform.position.y + swordData.getSwordSwingDistanceFromPlayer()), Quaternion.Euler(0, 0, 90));
             } else {
-                slashRelativePosToPlayer = new Vector2(0f, -swingDistanceFromPlayer);
-                currentSwordSlash = Instantiate(swordSlashPrefabs[slashIdx], new Vector2(transform.position.x, transform.position.y - swingDistanceFromPlayer), Quaternion.Euler(0, 0, -90));
+                slashRelativePosToPlayer = new Vector2(0f, -swordData.getSwordSwingDistanceFromPlayer());
+                currentSwordSlash = Instantiate(swordSlashPrefabs[slashIdx], new Vector2(transform.position.x, transform.position.y - swordData.getSwordSwingDistanceFromPlayer()), Quaternion.Euler(0, 0, -90));
             }
         } else {
             if(playerMovement.currentFacingDirection == 1) {
-                slashRelativePosToPlayer = new Vector2(swingDistanceFromPlayer, 0f);
-                currentSwordSlash = Instantiate(swordSlashPrefabs[slashIdx], new Vector2(transform.position.x + swingDistanceFromPlayer, transform.position.y), Quaternion.identity);
+                slashRelativePosToPlayer = new Vector2(swordData.getSwordSwingDistanceFromPlayer(), 0f);
+                currentSwordSlash = Instantiate(swordSlashPrefabs[slashIdx], new Vector2(transform.position.x + swordData.getSwordSwingDistanceFromPlayer(), transform.position.y), Quaternion.identity);
             } else {
-                slashRelativePosToPlayer = new Vector2(-swingDistanceFromPlayer, 0f);
-                currentSwordSlash = Instantiate(swordSlashPrefabs[slashIdx], new Vector2(transform.position.x - swingDistanceFromPlayer, transform.position.y), Quaternion.identity);
+                slashRelativePosToPlayer = new Vector2(-swordData.getSwordSwingDistanceFromPlayer(), 0f);
+                currentSwordSlash = Instantiate(swordSlashPrefabs[slashIdx], new Vector2(transform.position.x - swordData.getSwordSwingDistanceFromPlayer(), transform.position.y), Quaternion.identity);
                 currentSwordSlash.transform.localScale = new Vector2(-1f, currentSwordSlash.transform.localScale.y);
             }
         }

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<swords>
+  <sword id="0">
+    <name>Default Sword</name>
+    <description>The default sword that you begin with in World.</description>
+    <base-damage>10</base-damage>
+    <inventory-image-path>TODO</inventory-image-path>
+    <preswing-delay>0.1</preswing-delay>
+    <swing-time>0.1</swing-time>
+    <postswing-delay>0.1</postswing-delay>
+    <swing-reach>1</swing-reach>
+    <swing-distance-from-player>1.5</swing-distance-from-player>
+  </sword>
+</swords>
