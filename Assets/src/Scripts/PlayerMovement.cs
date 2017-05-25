@@ -10,6 +10,9 @@ public class PlayerMovement : MonoBehaviour {
     [HideInInspector]
     public float currentFacingDirection = 1; // 1 = right, -1 = left.  cannot be 0
 
+    [HideInInspector]
+    public bool playerLocked = false;
+
     private Rigidbody2D rb;
     private PlayerSoundController soundCtrl;
     private CollisionDirections collisions = new CollisionDirections();
@@ -18,6 +21,7 @@ public class PlayerMovement : MonoBehaviour {
     private bool isOnWall = false;
     private float inputLockTimer = 0f;
     private PlayerData playerData;
+    private PlayerCombatController combatCtrl;
 
     private const float MAX_PLAYER_FALL_SPEED = -18f;
     private const float MAX_WALL_SLIDE_SPEED = -7f;
@@ -49,6 +53,7 @@ public class PlayerMovement : MonoBehaviour {
         rb = GetComponent<Rigidbody2D>();
         playerData = GetComponent<PlayerData>();
         soundCtrl = GetComponent<PlayerSoundController>();
+        combatCtrl = GetComponent<PlayerCombatController>();
 
         // update player dimensions
         playerBounds = GetComponent<BoxCollider2D>().bounds;
@@ -79,10 +84,13 @@ public class PlayerMovement : MonoBehaviour {
         handleUserInput();
         capPlayerSpeed();
 
-        if(rb.velocity.x < 0) {
-            currentFacingDirection = -1;
-        } else if(rb.velocity.x > 0) {
-            currentFacingDirection = 1;
+        // update player direction, unless they are using their shield
+        if(!combatCtrl.isShieldActive) {
+            if(rb.velocity.x < 0) {
+                currentFacingDirection = -1;
+            } else if(rb.velocity.x > 0) {
+                currentFacingDirection = 1;
+            }
         }
 
         if(!grounded || rb.velocity.x == 0f) {
@@ -100,7 +108,7 @@ public class PlayerMovement : MonoBehaviour {
     ///     Handle a move input from the user.
     /// </summary>
     void handleMoveInput() {
-        if(Input.GetAxis("Horizontal") != 0 && inputLockTimer == 0f) {
+        if(Input.GetAxis("Horizontal") != 0 && inputLockTimer == 0f && !playerLocked) {
             // set the speed based on whether or not the player is sprinting
             float speed = 0f;
             if(Input.GetAxis("Sprint") != 0 && playerData.stamina > 0f) {
@@ -144,7 +152,7 @@ public class PlayerMovement : MonoBehaviour {
     ///     Handle a jump input from the user.
     /// </summary>
     void handleJumpInput() {
-        if(playerData.stamina > 0f) {
+        if(playerData.stamina > 0f && !playerLocked) {
             if(Input.GetButtonDown("Jump") && inputLockTimer == 0f) {
                 if(grounded) {
                     grounded = false;
@@ -174,7 +182,7 @@ public class PlayerMovement : MonoBehaviour {
     }
 
     void handleRollInput() {
-        if(Input.GetButtonDown("Roll") && grounded && inputLockTimer == 0f && playerData.stamina > 0f) {
+        if(Input.GetButtonDown("Roll") && grounded && inputLockTimer == 0f && playerData.stamina > 0f && !playerLocked) {
             inputLockTimer = ROLL_DELAY_TIMER;
             rb.velocity = new Vector2(currentFacingDirection * PLAYER_ROLL_SPEED, rb.velocity.y);
             playerData.useStamina(20f);
