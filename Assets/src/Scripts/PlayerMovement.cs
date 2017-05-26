@@ -92,7 +92,7 @@ public class PlayerMovement : MonoBehaviour {
         capPlayerSpeed();
 
         // update player direction, unless they are using their shield
-        if(!combatCtrl.isShieldActive) {
+        if(!combatCtrl.activeShield) {
             if(rb.velocity.x < 0) {
                 currentFacingDirection = -1;
             } else if(rb.velocity.x > 0) {
@@ -159,7 +159,7 @@ public class PlayerMovement : MonoBehaviour {
     ///     Handle a jump input from the user.
     /// </summary>
     void handleJumpInput() {
-        if(playerData.stamina > 0f && !playerLocked) {
+        if(playerData.stamina > 0f && !playerLocked && !combatCtrl.shieldIsUp) {
             if(Input.GetButtonDown("Jump") && inputLockTimer == 0f) {
                 if(grounded) {
                     grounded = false;

@@ -6,15 +6,18 @@ public class PlayerCombatController : MonoBehaviour {
     public List<GameObject> swordSlashPrefabs;
     public GameObject equippedShieldPrefab;
 
+    // FIXME does this actually need to be public??? not sure what i was thinking here
     [HideInInspector]
-    public GameObject isShieldActive;
+    public GameObject activeShield;
+
+    [HideInInspector]
+    public bool shieldIsUp = false;
 
     private GameObject currentSwordSlash = null;
     private Vector2 slashRelativePosToPlayer = new Vector2(0f, 0f);
 
     private PlayerData playerData;
     private PlayerMovement playerMovement;
-    private bool shieldIsUp = false;
 
     private int swingState = 0;
     private float swingTimer = 0f;
@@ -38,14 +41,14 @@ public class PlayerCombatController : MonoBehaviour {
     void Update() {
         // shield
         if(Input.GetAxis("Shield") != 0) {
-            if(isShieldActive == null && !shieldIsUp) {
+            if(activeShield == null && !shieldIsUp) {
                 shieldIsUp = true;
 
                 if(playerMovement.currentFacingDirection == 1) {
-                    isShieldActive = Instantiate(equippedShieldPrefab, new Vector2(transform.position.x + shieldData.getDistanceFromPlayer(), transform.position.y), Quaternion.identity);
+                    activeShield = Instantiate(equippedShieldPrefab, new Vector2(transform.position.x + shieldData.getDistanceFromPlayer(), transform.position.y), Quaternion.identity);
                 } else {
-                    isShieldActive = Instantiate(equippedShieldPrefab, new Vector2(transform.position.x - shieldData.getDistanceFromPlayer(), transform.position.y), Quaternion.identity);
-                    isShieldActive.transform.localScale = new Vector2(-1f, isShieldActive.transform.localScale.y);
+                    activeShield = Instantiate(equippedShieldPrefab, new Vector2(transform.position.x - shieldData.getDistanceFromPlayer(), transform.position.y), Quaternion.identity);
+                    activeShield.transform.localScale = new Vector2(-1f, activeShield.transform.localScale.y);
                 }
             }
 
@@ -53,12 +56,12 @@ public class PlayerCombatController : MonoBehaviour {
             updateShieldPosition();
         } else if(shieldIsUp) {
             shieldIsUp = false;
-            Destroy(isShieldActive);
-            isShieldActive = null; // explicit set to null
+            Destroy(activeShield);
+            activeShield = null; // explicit set to null
         }
 
         // sword
-        if(Input.GetButtonDown("Swing") && playerData.stamina > 0f && currentSwordSlash == null && !isShieldActive && swingState == SwordData.SWING_STATE_NONE) {
+        if(Input.GetButtonDown("Swing") && playerData.stamina > 0f && currentSwordSlash == null && !activeShield && swingState == SwordData.SWING_STATE_NONE) {
             swingState = SwordData.SWING_STATE_PRESWING;
             swingTimer = swordData.getSwordPreSwingDelay();
             playerMovement.playerLocked = true;
@@ -104,11 +107,11 @@ public class PlayerCombatController : MonoBehaviour {
     ///     Keep the shield object the same distance from the player at all times.
     /// </summary>
     private void updateShieldPosition() {
-        if(isShieldActive != null) {
+        if(activeShield != null) {
             if(playerMovement.currentFacingDirection == 1) {
-                isShieldActive.transform.position = new Vector2(transform.position.x + shieldData.getDistanceFromPlayer(), transform.position.y);
+                activeShield.transform.position = new Vector2(transform.position.x + shieldData.getDistanceFromPlayer(), transform.position.y);
             } else {
-                isShieldActive.transform.position = new Vector2(transform.position.x - shieldData.getDistanceFromPlayer(), transform.position.y);
+                activeShield.transform.position = new Vector2(transform.position.x - shieldData.getDistanceFromPlayer(), transform.position.y);
             }
         }
     }
