@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<shields>
+  <shield id="0">
+    <name>Default Shield</name>
+    <description>The default shield that you begin with in World.</description>
+    <distance-from-player>1.0</distance-from-player>
+  </shield>
+</shields>

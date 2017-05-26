@@ -30,16 +30,16 @@ public class SwordData{
     public SwordData() {
         // if not given a sword id, default to the default 
         swordId = 0;
-        loadSwordProperties();
+        loadProperties();
     }
 
     public SwordData(int id) {
         swordId = id;
 
-        loadSwordProperties();
+        loadProperties();
     }
 
-    private void loadSwordProperties() {
+    private void loadProperties() {
         XmlDocument swordXml = new XmlDocument();
         swordXml.Load("Assets/data/swords.xml");
         if(swordXml != null) {

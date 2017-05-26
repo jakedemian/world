@@ -19,9 +19,9 @@ public class PlayerCombatController : MonoBehaviour {
     private int swingState = 0;
     private float swingTimer = 0f;
     private SwordData swordData = new SwordData();
+    private ShieldData shieldData = new ShieldData();
     
     // TODO FIXME do the same thing with shields as i did with swords
-    private float shieldDistanceFromPlayer = 1f;
 
 
     /// <summary>
@@ -42,9 +42,9 @@ public class PlayerCombatController : MonoBehaviour {
                 shieldIsUp = true;
 
                 if(playerMovement.currentFacingDirection == 1) {
-                    isShieldActive = Instantiate(equippedShieldPrefab, new Vector2(transform.position.x + shieldDistanceFromPlayer, transform.position.y), Quaternion.identity);
+                    isShieldActive = Instantiate(equippedShieldPrefab, new Vector2(transform.position.x + shieldData.getDistanceFromPlayer(), transform.position.y), Quaternion.identity);
                 } else {
-                    isShieldActive = Instantiate(equippedShieldPrefab, new Vector2(transform.position.x - shieldDistanceFromPlayer, transform.position.y), Quaternion.identity);
+                    isShieldActive = Instantiate(equippedShieldPrefab, new Vector2(transform.position.x - shieldData.getDistanceFromPlayer(), transform.position.y), Quaternion.identity);
                     isShieldActive.transform.localScale = new Vector2(-1f, isShieldActive.transform.localScale.y);
                 }
             }
@@ -106,9 +106,9 @@ public class PlayerCombatController : MonoBehaviour {
     private void updateShieldPosition() {
         if(isShieldActive != null) {
             if(playerMovement.currentFacingDirection == 1) {
-                isShieldActive.transform.position = new Vector2(transform.position.x + shieldDistanceFromPlayer, transform.position.y);
+                isShieldActive.transform.position = new Vector2(transform.position.x + shieldData.getDistanceFromPlayer(), transform.position.y);
             } else {
-                isShieldActive.transform.position = new Vector2(transform.position.x - shieldDistanceFromPlayer, transform.position.y);
+                isShieldActive.transform.position = new Vector2(transform.position.x - shieldData.getDistanceFromPlayer(), transform.position.y);
             }
         }
     }
