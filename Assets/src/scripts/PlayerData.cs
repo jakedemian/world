@@ -3,11 +3,20 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerData : MonoBehaviour {
+    public AudioClip levelUpSound;
+
     public int maxHealth = 5;
     public float maxStam = 100;
 
     public int health;
     public float stamina;
+    public int level;
+    public int experience;
+
+    // TODO this needs to come from an xml file somewhere, maybe even have a separate class for it
+    private int experienceToNextLevel = 100;
+
+
 
     private float stamRechargeTimer = 0f;
 
@@ -22,6 +31,15 @@ public class PlayerData : MonoBehaviour {
     void Start() {
         health = maxHealth;
         stamina = maxStam;
+
+        level = 1;
+        experience = 0;        
+    }
+
+    void Update() {
+        if(experience >= experienceToNextLevel) {
+            levelUp();
+        }
     }
 
     /// <summary>
@@ -41,6 +59,19 @@ public class PlayerData : MonoBehaviour {
                 stamina = maxStam;
             }
         }
+    }
+
+    private void levelUp() {
+        experience -= experienceToNextLevel;
+
+        // TODO fix this, or come up with some actual mathematical function for it
+        experienceToNextLevel = (int) (experienceToNextLevel * 1.2f);
+        level++;
+
+        // OTHER STUFF, assign attribute points or health/stam or whatever i decide later
+
+        // play the level up sound
+        AudioSource.PlayClipAtPoint(levelUpSound, transform.position);
     }
 
     /// <summary>
