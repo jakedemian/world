@@ -120,7 +120,7 @@ public class PlayerCombatController : MonoBehaviour {
         int slashIdx = Random.Range(0, swordSlashPrefabs.Count);
 
         playerData.useStamina(20f);
-        string analogPrimaryDir = getPrimaryAnalogStickDirection();
+        string analogPrimaryDir = InputHelper.getPrimaryAnalogStickDirection();
         if(analogPrimaryDir.Equals("up") || analogPrimaryDir.Equals("down")) {
             if(analogPrimaryDir.Equals("up")) {
                 slashRelativePosToPlayer = new Vector2(0f, swordData.getSwordSwingDistanceFromPlayer());
@@ -148,31 +148,5 @@ public class PlayerCombatController : MonoBehaviour {
         if(currentSwordSlash != null) {
             currentSwordSlash.transform.position = new Vector2(transform.position.x + slashRelativePosToPlayer.x, transform.position.y + slashRelativePosToPlayer.y);
         }
-    }
-
-    private string getPrimaryAnalogStickDirection() {
-        float h = Input.GetAxis("Horizontal");
-        float v = Input.GetAxis("Vertical");
-
-        string dir = "";
-        if(Mathf.Abs(h) > Mathf.Abs(v)) {
-            // horizontal primary
-            if(h > 0) {
-                dir = "right";
-            } else if (h < 0) {
-                dir = "left";
-            }
-        } else if(Mathf.Abs(h) < Mathf.Abs(v)) {
-            // vertical primary
-            if(v > 0) {
-                dir = "up";
-            } else if (v < 0) {
-                dir = "down";
-            }
-        }
-
-        return dir;
-    }
-
-	
+    }	
 }
