@@ -18,11 +18,17 @@ public class UIController : MonoBehaviour {
     private int playerHealth = 0;
     private float playerStamina = 0f;
 
+    /// <summary>
+    ///     START
+    /// </summary>
     void Start() {
         playerHealthBlockList = new List<GameObject>();
         playerStamBlockList = new List<GameObject>();
     }
 
+    /// <summary>
+    ///     UPDATE
+    /// </summary>
     void Update() {
         if(Input.GetKeyDown(KeyCode.Q)) {
             Application.Quit();
@@ -33,6 +39,9 @@ public class UIController : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    ///     ON GUI
+    /// </summary>
     void OnGUI() {
         playerHealth = player.GetComponent<PlayerData>().health;
         playerStamina = player.GetComponent<PlayerData>().stamina;
@@ -73,6 +82,9 @@ public class UIController : MonoBehaviour {
         previousPlayerStamina = playerStamina;
     }
 
+    /// <summary>
+    ///     Delete all health blocks from the ui and deallocate them from memory.
+    /// </summary>
     void clearHealthUI() {
         for(int i = 0; i < playerHealthBlockList.Count; i++) {
             Destroy(playerHealthBlockList[i]);
@@ -83,6 +95,9 @@ public class UIController : MonoBehaviour {
         playerHealthBlockList = new List<GameObject>();
     }
 
+    /// <summary>
+    ///     Delete all stamina blocks from the ui and deallocate them from memory.
+    /// </summary>
     void clearStaminaUI() {
         for(int i = 0; i < playerStamBlockList.Count; i++) {
             Destroy(playerStamBlockList[i]);

@@ -14,11 +14,17 @@ public class PlayerData : MonoBehaviour {
     private float STAMINA_USE_RECHARGE_DELAY = 1.5f;
     private float STAMINA_RECHARGE_SPEED = 40f;
 
+    /// <summary>
+    ///     START
+    /// </summary>
     void Start() {
         health = maxHealth;
         stamina = maxStam;
     }
 
+    /// <summary>
+    ///     FIXED UPDATE
+    /// </summary>
     void FixedUpdate() {
         if(stamRechargeTimer > 0f) {
             stamRechargeTimer -= Time.deltaTime;
@@ -35,6 +41,10 @@ public class PlayerData : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    ///     Use some stamina, if any is available.
+    /// </summary>
+    /// <param name="amount"></param>
     public void useStamina(float amount) {
         if(stamina > 0f) {
             stamRechargeTimer = STAMINA_USE_RECHARGE_DELAY;
@@ -42,6 +52,9 @@ public class PlayerData : MonoBehaviour {
             if(stamina < 0f) {
                 stamina = 0f;
             }
+        } else {
+            // ??? TODO ???
+            // should i punish the player for over-using stam?
         }
     }
 }

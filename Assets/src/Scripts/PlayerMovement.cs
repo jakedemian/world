@@ -181,6 +181,9 @@ public class PlayerMovement : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    ///     Handle the player pressing the roll button.
+    /// </summary>
     void handleRollInput() {
         if(Input.GetButtonDown("Roll") && grounded && inputLockTimer == 0f && playerData.stamina > 0f && !playerLocked) {
             inputLockTimer = ROLL_DELAY_TIMER;

@@ -15,30 +15,9 @@ public class PlayerSoundController : MonoBehaviour {
     private float footstepType = 0f;
     private bool footsteps = false;
 
-    public void startFootsteps(float type, string blockTag, Transform playerTrans) {
-        footstepType = type;
-        footstepBlockTag = blockTag;
-        playerTransform = playerTrans;
-        footsteps = true;
-    }
-
-    public void stopFootsteps() {
-        footsteps = false;
-        footstepTimer = 0f;
-    }
-
-    public void playJumpSound(string blockTag, Transform playerTrans) {
-        footstepBlockTag = blockTag;
-        playerTransform = playerTrans;
-        playSingleFootstep();
-    }
-
-    public void playLandSound(string blockTag, Transform playerTrans) {
-        footstepBlockTag = blockTag;
-        playerTransform = playerTrans;
-        playSingleFootstep();
-    }
-
+    /// <summary>
+    ///     FIXED UPDATE
+    /// </summary>
     void FixedUpdate() {
         if(footsteps) {
             footstepTimer -= Time.deltaTime;
@@ -50,7 +29,53 @@ public class PlayerSoundController : MonoBehaviour {
             }
         }
     }
-    
+
+    /// <summary>
+    ///     Begin playing footstep sounds, if they are not already playing.
+    /// </summary>
+    /// <param name="type">Type of footstep (jog, sprint, etc)</param>
+    /// <param name="blockTag">The tag of the block the character is colliding with.</param>
+    /// <param name="playerTrans">The Transform of the character we are playing the sound for.</param>
+    public void startFootsteps(float type, string blockTag, Transform playerTrans) {
+        footstepType = type;
+        footstepBlockTag = blockTag;
+        playerTransform = playerTrans;
+        footsteps = true;
+    }
+
+    /// <summary>
+    ///     Stop the looping of footstep sounds.
+    /// </summary>
+    public void stopFootsteps() {
+        footsteps = false;
+        footstepTimer = 0f;
+    }
+
+    /// <summary>
+    ///     Play a jump sound.
+    /// </summary>
+    /// <param name="blockTag">The tag of the block jumping from.</param>
+    /// <param name="playerTrans">The Transform of the character that is jumping.</param>
+    public void playJumpSound(string blockTag, Transform playerTrans) {
+        footstepBlockTag = blockTag;
+        playerTransform = playerTrans;
+        playSingleFootstep();
+    }
+
+    /// <summary>
+    ///     Play a landing sound.
+    /// </summary>
+    /// <param name="blockTag">The tag of the block we are landing on.</param>
+    /// <param name="playerTrans">The Transform of the character that is landing.</param>
+    public void playLandSound(string blockTag, Transform playerTrans) {
+        footstepBlockTag = blockTag;
+        playerTransform = playerTrans;
+        playSingleFootstep();
+    }
+
+    /// <summary>
+    ///     Play a single footstep sound.
+    /// </summary>
     void playSingleFootstep() {
         List<AudioClip> footstepSounds = new List<AudioClip>();
 

@@ -13,6 +13,9 @@ public class CollisionDirections {
     public GameObject upCollisionObj;
     public GameObject downCollisionObj;
 
+    /// <summary>
+    ///     Reset all collision information to the default state.
+    /// </summary>
     public void clear() {
         right = false;
         left = false;
