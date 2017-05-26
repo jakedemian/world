@@ -163,7 +163,16 @@ public class PlayerMovement : MonoBehaviour {
             if(Input.GetButtonDown("Jump") && inputLockTimer == 0f && (grounded || isOnWall)) {
                 triggerJump();
                 playerData.useStamina(20f);
-                soundCtrl.playJumpSound(collisions.downCollisionObj.tag, transform);
+
+                if(collisions.down && !isOnWall) {
+                    soundCtrl.playJumpSound(collisions.downCollisionObj.tag, transform);
+                } else {
+                    if(collisions.right) {
+                        soundCtrl.playJumpSound(collisions.rightCollisionObj.tag, transform);
+                    } else {
+                        soundCtrl.playJumpSound(collisions.leftCollisionObj.tag, transform);
+                    }
+                }
             } else if(Input.GetButtonUp("Jump")) {
                 if(!grounded && rb.velocity.y > 0) {
                     rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / JUMP_FORCE_RELEASE_DIVIDER);
