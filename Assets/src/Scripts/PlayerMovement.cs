@@ -46,6 +46,8 @@ public class PlayerMovement : MonoBehaviour {
 
     private const float WALL_JUMP_DELAY_TIMER = 0.2f;
     private const float ROLL_DELAY_TIMER = 0.3f;
+
+    private const float COLLISION_RAYCAST_DISTANCE = 0.05f;
     
 	/// <summary>
     ///     START
@@ -246,14 +248,14 @@ public class PlayerMovement : MonoBehaviour {
     /// <param name="direction">The direction both raycasts will cast</param>
     /// <returns>The first raycast if there is a hit, the second if the first has no hit</returns>
     private RaycastHit2D spawnRaycasts(Vector2 startPoint1, Vector2 startPoint2, Vector2 direction) {
-        Debug.DrawRay(startPoint1, direction * 0.1f, Color.green);
-        Debug.DrawRay(startPoint2, direction * 0.1f, Color.green);
+        Debug.DrawRay(startPoint1, direction * COLLISION_RAYCAST_DISTANCE, Color.green);
+        Debug.DrawRay(startPoint2, direction * COLLISION_RAYCAST_DISTANCE, Color.green);
 
-        RaycastHit2D hit = Physics2D.Raycast(startPoint1, direction, 0.1f, LAYER_TERRAIN);
+        RaycastHit2D hit = Physics2D.Raycast(startPoint1, direction, COLLISION_RAYCAST_DISTANCE, LAYER_TERRAIN);
         if(hit) {
             return hit;
         } else {
-            return Physics2D.Raycast(startPoint2, direction, 0.1f, LAYER_TERRAIN);
+            return Physics2D.Raycast(startPoint2, direction, COLLISION_RAYCAST_DISTANCE, LAYER_TERRAIN);
         }
     }
 
