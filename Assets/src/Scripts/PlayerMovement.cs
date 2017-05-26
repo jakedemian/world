@@ -260,6 +260,24 @@ public class PlayerMovement : MonoBehaviour {
     }
 
     /// <summary>
+    ///     Prevent the player from phasing through the ground this frame
+    /// </summary>
+    /// <param name="downHit">The downward RaycastHit2D object</param>
+    private void preventPlayerPhaseThroughGround(RaycastHit2D downHit) {
+        BoxCollider2D otherCollider = (BoxCollider2D)downHit.collider;
+        float otherColliderVerticalRadius = otherCollider.size.y / 2f;
+        float collisionPointToColliderCenterVerticalDistance = Mathf.Abs(downHit.point.y - downHit.collider.gameObject.transform.position.y);
+        float collisionPointToColliderCenterHorizontalDistance = Mathf.Abs(downHit.point.x - downHit.collider.gameObject.transform.position.x);
+        float arbitraryThresholdForVerticalPositionFix = -10f;
+
+        if(collisionPointToColliderCenterVerticalDistance <= 0.51f
+            && collisionPointToColliderCenterHorizontalDistance <= 0.51f
+            && rb.velocity.y <= arbitraryThresholdForVerticalPositionFix) {
+            transform.position = new Vector2(transform.position.x, downHit.collider.gameObject.transform.position.y + 1f);
+        }
+    }
+
+    /// <summary>
     ///     Update the player's collision states in all directions
     /// </summary>
     private void updateCollisions() {
@@ -272,30 +290,19 @@ public class PlayerMovement : MonoBehaviour {
 
         collisions.clear();
 
-        ////////////////////////////////
         // down
         grounded = false;
         RaycastHit2D downHit = spawnRaycasts(bottomLeft, bottomRight, Vector2.down);
         collisions.down = downHit;
-        if(downHit) {
+        if(collisions.down) {
+            collisions.downCollisionObj = downHit.collider.gameObject;
+
+            // prevent grounded from being true if player is moving upward
             if(rb.velocity.y <= 0f) {
                 grounded = true;
             }
 
-            collisions.downCollisionObj = downHit.collider.gameObject;
-
-            // prevent the player from phasing through the ground this frame by only doing this if the collision point and the current transform's 
-            BoxCollider2D otherCollider = (BoxCollider2D)downHit.collider;
-            float otherColliderVerticalRadius = otherCollider.size.y / 2f;
-            float collisionPointToColliderCenterVerticalDistance = Mathf.Abs(downHit.point.y - downHit.collider.gameObject.transform.position.y);
-            float collisionPointToColliderCenterHorizontalDistance = Mathf.Abs(downHit.point.x - downHit.collider.gameObject.transform.position.x);
-            float arbitraryThresholdForVerticalPositionFix = -10f;
-
-            if(collisionPointToColliderCenterVerticalDistance <= 0.51f 
-                && collisionPointToColliderCenterHorizontalDistance <= 0.51f 
-                && rb.velocity.y <= arbitraryThresholdForVerticalPositionFix) {
-                    transform.position = new Vector2(transform.position.x, downHit.collider.gameObject.transform.position.y + 1f);
-            }
+            preventPlayerPhaseThroughGround(downHit);
         }
 
         // up
