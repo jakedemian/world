@@ -80,7 +80,14 @@ public class PlayerMovement : MonoBehaviour {
     ///     UPDATE
     /// </summary>
 	void Update () {
+        bool wasInAir = !collisions.down;
         updateCollisions();
+
+        if(wasInAir && grounded) {
+            // player has landed, play sound
+            soundCtrl.playLandSound(collisions.downCollisionObj.tag, transform);
+        }
+
         handleUserInput();
         capPlayerSpeed();
 
