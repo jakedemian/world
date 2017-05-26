@@ -1645,7 +1645,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1454995970}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.79, y: 8.63, z: 0}
+  m_LocalPosition: {x: -0.45, y: 6.21, z: 0}
   m_LocalScale: {x: 1, y: 1.5, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -1742,7 +1742,8 @@ MonoBehaviour:
   - {fileID: 1575297542132808, guid: 9d20ea4e7507daa468f688a5c1289c4f, type: 2}
   equippedShieldPrefab: {fileID: 1175565832620898, guid: 9d39931902d512d48ae768818c8310a9,
     type: 2}
-  isShieldActive: {fileID: 0}
+  activeShield: {fileID: 0}
+  shieldIsUp: 0
 --- !u!4 &1472736606 stripped
 Transform:
   m_PrefabParentObject: {fileID: 4039130388926586, guid: a5e5101599e167142a0f3155f8b05bd7,
