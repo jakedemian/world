@@ -39,7 +39,8 @@ public class PlayerMovement : MonoBehaviour {
     private const float WALL_SLIDE_GRAVITY_VELOCITY = -15f;
 
     private const float JUMP_FORCE = 16f;
-    private const float WALL_JUMP_FORCE = 16f;
+    private const float WALL_JUMP_FORCE = 12f;
+    private Vector2 WALL_JUMP_DIRECTION_WEIGHT = new Vector2(0.75f, 1.5f);
 
     private const float JUMP_FORCE_RELEASE_DIVIDER = 1.5f;
 
@@ -105,7 +106,7 @@ public class PlayerMovement : MonoBehaviour {
         }
     }
 
-    void handleUserInput() {
+    private void handleUserInput() {
         handleMoveInput();
         handleJumpInput();
         handleRollInput();
@@ -114,15 +115,14 @@ public class PlayerMovement : MonoBehaviour {
     /// <summary>
     ///     Handle a move input from the user.
     /// </summary>
-    void handleMoveInput() {
+    private void handleMoveInput() {
         if(Input.GetAxis("Horizontal") != 0 && inputLockTimer == 0f && !playerLocked) {
-            // set the speed based on whether or not the player is sprinting
             float speed = 0f;
             if(Input.GetAxis("Sprint") != 0 && playerData.stamina > 0f) {
                 // sprint
                 int dir = Input.GetAxis("Horizontal") > 0 ? 1 : -1;
                 speed = PLAYER_SPRINT_SPEED * dir;
-                playerData.useStamina(12f * Time.deltaTime);
+                playerData.useStamina(PlayerData.PLAYER_SPRINT_STAMINA_DRAIN_RATE * Time.deltaTime);
 
                 if(grounded) {
                     soundCtrl.startFootsteps(PlayerSoundController.FOOTSTEP_TYPE_SPRINT, collisions.downCollisionObj.tag, transform);
@@ -130,14 +130,12 @@ public class PlayerMovement : MonoBehaviour {
             } else {
                 // walk / jog
                 speed = PLAYER_MOVE_SPEED * Input.GetAxis("Horizontal");
+                if(Mathf.Abs(speed) < PLAYER_MIN_MOVE_SPEED) {
+                    speed = speed > 0 ? PLAYER_MIN_MOVE_SPEED : -PLAYER_MIN_MOVE_SPEED;
+                }
 
                 if(grounded) {
                     soundCtrl.startFootsteps(PlayerSoundController.FOOTSTEP_TYPE_JOG, collisions.downCollisionObj.tag, transform);
-                }
-
-                // if not sprinting, we don't want the player to go TOO slow, so limit that
-                if(Mathf.Abs(speed) < PLAYER_MIN_MOVE_SPEED) {
-                    speed = speed > 0 ? PLAYER_MIN_MOVE_SPEED : -PLAYER_MIN_MOVE_SPEED;
                 }
             }
 
@@ -158,28 +156,12 @@ public class PlayerMovement : MonoBehaviour {
     /// <summary>
     ///     Handle a jump input from the user.
     /// </summary>
-    void handleJumpInput() {
+    private void handleJumpInput() {
         if(playerData.stamina > 0f && !playerLocked && !combatCtrl.shieldIsUp) {
-            if(Input.GetButtonDown("Jump") && inputLockTimer == 0f) {
-                if(grounded) {
-                    grounded = false;
-                    rb.AddForce(Vector2.up * JUMP_FORCE, ForceMode2D.Impulse);
-                    soundCtrl.playJumpSound(collisions.downCollisionObj.tag, transform);
-                    playerData.useStamina(20f);
-                } else if(isOnWall) {
-                    if(collisions.right) {
-                        Vector2 upLeft = new Vector2(-1f, 1f) * WALL_JUMP_FORCE;
-                        rb.velocity = upLeft;
-                        inputLockTimer = WALL_JUMP_DELAY_TIMER;
-                        soundCtrl.playJumpSound(collisions.rightCollisionObj.tag, transform);
-                    } else if(collisions.left) {
-                        Vector2 upRight = new Vector2(1f, 1f) * WALL_JUMP_FORCE;
-                        rb.velocity = upRight;
-                        inputLockTimer = WALL_JUMP_DELAY_TIMER;
-                        soundCtrl.playJumpSound(collisions.leftCollisionObj.tag, transform);
-                    }
-                    playerData.useStamina(20f);
-                }
+            if(Input.GetButtonDown("Jump") && inputLockTimer == 0f && (grounded || isOnWall)) {
+                triggerJump();
+                playerData.useStamina(20f);
+                soundCtrl.playJumpSound(collisions.downCollisionObj.tag, transform);
             } else if(Input.GetButtonUp("Jump")) {
                 if(!grounded && rb.velocity.y > 0) {
                     rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / JUMP_FORCE_RELEASE_DIVIDER);
@@ -189,9 +171,27 @@ public class PlayerMovement : MonoBehaviour {
     }
 
     /// <summary>
+    ///     Perform a regular jump or wall jump.
+    /// </summary>
+    private void triggerJump() {
+        if(grounded) {
+            grounded = false;
+            rb.AddForce(Vector2.up * JUMP_FORCE, ForceMode2D.Impulse);
+        } else if(isOnWall) {
+            if(collisions.right) {
+                rb.velocity = new Vector2(-WALL_JUMP_DIRECTION_WEIGHT.x, WALL_JUMP_DIRECTION_WEIGHT.y) * WALL_JUMP_FORCE;
+                inputLockTimer = WALL_JUMP_DELAY_TIMER;
+            } else if(collisions.left) {
+                rb.velocity = WALL_JUMP_DIRECTION_WEIGHT * WALL_JUMP_FORCE;
+                inputLockTimer = WALL_JUMP_DELAY_TIMER;
+            }
+        }
+    }
+
+    /// <summary>
     ///     Handle the player pressing the roll button.
     /// </summary>
-    void handleRollInput() {
+    private void handleRollInput() {
         if(Input.GetButtonDown("Roll") && grounded && inputLockTimer == 0f && playerData.stamina > 0f && !playerLocked) {
             inputLockTimer = ROLL_DELAY_TIMER;
             rb.velocity = new Vector2(currentFacingDirection * PLAYER_ROLL_SPEED, rb.velocity.y);
@@ -203,30 +203,20 @@ public class PlayerMovement : MonoBehaviour {
     /// <summary>
     ///     Max out the player's speed
     /// </summary>
-    void capPlayerSpeed() {
+    private void capPlayerSpeed() {
         // fall speed
-        if(isOnWall) {
-            if(rb.velocity.y < MAX_WALL_SLIDE_SPEED) {
-                rb.velocity = new Vector2(rb.velocity.x, MAX_WALL_SLIDE_SPEED);
-            }
-        } else {
-            if(rb.velocity.y < MAX_PLAYER_FALL_SPEED) {
-                rb.velocity = new Vector2(rb.velocity.x, MAX_PLAYER_FALL_SPEED);
-            }
+        float maxVertSpeed = isOnWall ? MAX_WALL_SLIDE_SPEED : MAX_PLAYER_FALL_SPEED;
+        if(rb.velocity.y < maxVertSpeed) {
+            rb.velocity = new Vector2(rb.velocity.x, maxVertSpeed);
         }
 
-        // grounded move speed
+        // move speed
+        float maxMoveSpeed = grounded ? MAX_PLAYER_MOVE_SPEED : MAX_PLAYER_MOVE_SPEED_AIR;
         if(grounded) {
-            if(rb.velocity.x > MAX_PLAYER_MOVE_SPEED) {
-                rb.velocity = new Vector2(MAX_PLAYER_MOVE_SPEED, rb.velocity.y);
-            } else if(rb.velocity.x < -MAX_PLAYER_MOVE_SPEED) {
-                rb.velocity = new Vector2(-MAX_PLAYER_MOVE_SPEED, rb.velocity.y);
-            }
-        } else {
-            if(rb.velocity.x > MAX_PLAYER_MOVE_SPEED_AIR) {
-                rb.velocity = new Vector2(MAX_PLAYER_MOVE_SPEED_AIR, rb.velocity.y);
-            } else if(rb.velocity.x < -MAX_PLAYER_MOVE_SPEED_AIR) {
-                rb.velocity = new Vector2(-MAX_PLAYER_MOVE_SPEED_AIR, rb.velocity.y);
+            if(rb.velocity.x > maxMoveSpeed) {
+                rb.velocity = new Vector2(maxMoveSpeed, rb.velocity.y);
+            } else if(rb.velocity.x < -maxMoveSpeed) {
+                rb.velocity = new Vector2(-maxMoveSpeed, rb.velocity.y);
             }
         }
 
@@ -238,7 +228,7 @@ public class PlayerMovement : MonoBehaviour {
     /// <summary>
     ///     Apply the gravity force to the player for this frame, if necessary and depending on current player state.
     /// </summary>
-    void applyGravity() {
+    private void applyGravity() {
         if(!grounded) {
             if(isOnWall && rb.velocity.y < 0) {                
                 rb.AddForce(new Vector2(0f, WALL_SLIDE_GRAVITY_VELOCITY));
@@ -251,10 +241,10 @@ public class PlayerMovement : MonoBehaviour {
     /// <summary>
     ///     Spawn two raycasts in a direction from two different points.
     /// </summary>
-    /// <param name="startPoint1"></param>
-    /// <param name="startPoint2"></param>
-    /// <param name="direction"></param>
-    /// <returns></returns>
+    /// <param name="startPoint1">The start point of the first raycast</param>
+    /// <param name="startPoint2">The start point of the second raycast</param>
+    /// <param name="direction">The direction both raycasts will cast</param>
+    /// <returns>The first raycast if there is a hit, the second if the first has no hit</returns>
     private RaycastHit2D spawnRaycasts(Vector2 startPoint1, Vector2 startPoint2, Vector2 direction) {
         Debug.DrawRay(startPoint1, direction * 0.1f, Color.green);
         Debug.DrawRay(startPoint2, direction * 0.1f, Color.green);

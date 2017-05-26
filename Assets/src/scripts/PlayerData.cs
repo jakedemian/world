@@ -14,6 +14,8 @@ public class PlayerData : MonoBehaviour {
     private float STAMINA_USE_RECHARGE_DELAY = 1.5f;
     private float STAMINA_RECHARGE_SPEED = 40f;
 
+    public static float PLAYER_SPRINT_STAMINA_DRAIN_RATE = 12f;
+
     /// <summary>
     ///     START
     /// </summary>
