@@ -9,6 +9,8 @@ public class PlayerAnimationController : MonoBehaviour {
     private PlayerData playerData;
     private Rigidbody2D rb;
 
+    //private bool playerInAir = false;
+
     private const float RUN_SPEED_NORMAL = 1.0f;
     private const float RUN_SPEED_SPRINT = 1.3f;
 
@@ -31,7 +33,8 @@ public class PlayerAnimationController : MonoBehaviour {
             transform.localScale = new Vector2(startingXScale, transform.localScale.y);
         }
 
-        if(playerMovement.grounded && rb.velocity.x != 0f) {
+
+        if(playerMovement.grounded && (Mathf.Abs(rb.velocity.x) >= PlayerMovement.PLAYER_MIN_MOVE_SPEED)) {
             an.SetTrigger("run");
 
             if(Input.GetAxis("Sprint") != 0 && playerData.stamina > 0f) {
@@ -41,6 +44,19 @@ public class PlayerAnimationController : MonoBehaviour {
             }
         } else {
             an.SetTrigger("stop");
+        }
+
+        if(playerMovement.grounded && !playerMovement.isOnWall) {
+            Debug.Log("1");
+            an.SetTrigger("land");
+        } else if(!playerMovement.isOnWall) {
+            Debug.Log("2");
+
+            an.SetTrigger("jump");
+        } else if(playerMovement.isOnWall) {
+            Debug.Log("3");
+
+            an.SetTrigger("wall");
         }
     }
 

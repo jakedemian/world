@@ -8,7 +8,7 @@ public class PlayerSoundController : MonoBehaviour {
     private Transform playerTransform;
 
     public static float FOOTSTEP_TYPE_JOG = 0.35f;
-    public static float FOOTSTEP_TYPE_SPRINT = 0.25f; 
+    public static float FOOTSTEP_TYPE_SPRINT = 0.28f; 
 
     private float footstepTimer = 0f;
     private string footstepBlockTag = "";

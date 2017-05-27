@@ -13,12 +13,18 @@ public class PlayerMovement : MonoBehaviour {
     [HideInInspector]
     public bool playerLocked = false;
 
+    [HideInInspector]
+    public const float PLAYER_MIN_MOVE_SPEED = 3f;
+
+    [HideInInspector]
+    public bool isOnWall = false;
+
+
     private Rigidbody2D rb;
     private PlayerSoundController soundCtrl;
     private CollisionDirections collisions = new CollisionDirections();
     private Bounds playerBounds;
     private Vector2 playerDimensions;
-    private bool isOnWall = false;
     private float inputLockTimer = 0f;
     private PlayerData playerData;
     private PlayerCombatController combatCtrl;
@@ -27,7 +33,6 @@ public class PlayerMovement : MonoBehaviour {
     private const float MAX_WALL_SLIDE_SPEED = -7f;
 
     private const float PLAYER_MOVE_SPEED = 7f;
-    private const float PLAYER_MIN_MOVE_SPEED = 3f;
     private const float PLAYER_SPRINT_SPEED = 10f;
     private const float PLAYER_ROLL_SPEED = 15f;
     private const float MAX_PLAYER_MOVE_SPEED = 15f;
@@ -286,11 +291,26 @@ public class PlayerMovement : MonoBehaviour {
         }
     }
 
+    private bool isBothDownRaycastsColliding(Vector2 startPoint1, Vector2 startPoint2) {
+        bool res = false;
+
+        RaycastHit2D hit1 = Physics2D.Raycast(startPoint1, Vector2.down, COLLISION_RAYCAST_DISTANCE, LAYER_TERRAIN);
+        RaycastHit2D hit2 = Physics2D.Raycast(startPoint2, Vector2.down, COLLISION_RAYCAST_DISTANCE, LAYER_TERRAIN);
+        
+        if(hit1 && hit2) {
+            res = true;
+        }
+
+        return res;
+    }
+
     /// <summary>
     ///     Update the player's collision states in all directions
     /// </summary>
     private void updateCollisions() {
         playerBounds = GetComponent<BoxCollider2D>().bounds;
+        grounded = false;
+        isOnWall = false;
 
         Vector2 bottomLeft = new Vector2(playerBounds.min.x + 0.001f, playerBounds.min.y + 0.001f);
         Vector2 bottomRight = new Vector2(playerBounds.max.x - 0.001f, playerBounds.min.y + 0.001f);
@@ -298,21 +318,6 @@ public class PlayerMovement : MonoBehaviour {
         Vector2 topRight = new Vector2(playerBounds.max.x - 0.001f, playerBounds.max.y - 0.001f);
 
         collisions.clear();
-
-        // down
-        grounded = false;
-        RaycastHit2D downHit = spawnRaycasts(bottomLeft, bottomRight, Vector2.down);
-        collisions.down = downHit;
-        if(collisions.down) {
-            collisions.downCollisionObj = downHit.collider.gameObject;
-
-            // prevent grounded from being true if player is moving upward
-            if(rb.velocity.y <= 0f) {
-                grounded = true;
-            }
-
-            preventPlayerPhaseThroughGround(downHit);
-        }
 
         // up
         RaycastHit2D upHit = spawnRaycasts(topLeft, topRight, Vector2.up);
@@ -335,8 +340,30 @@ public class PlayerMovement : MonoBehaviour {
             collisions.leftCollisionObj = leftHit.collider.gameObject;
         }
 
+        // down
+        RaycastHit2D downHit = spawnRaycasts(bottomLeft, bottomRight, Vector2.down);
+        collisions.down = downHit;
+        if(collisions.down) {
+            collisions.downCollisionObj = downHit.collider.gameObject;
+            preventPlayerPhaseThroughGround(downHit);            
+        }
+
+        if((collisions.right || collisions.left) && collisions.down) {
+            // the down collision must have BOTH raycasts colliding in order to consider the player grounded
+            grounded = isBothDownRaycastsColliding(bottomLeft, bottomRight);
+        } else if(collisions.down && rb.velocity.y <= 0f) {
+            grounded = true;
+        }
+
         // update on wall state
-        isOnWall = !grounded && (collisions.left || collisions.right);
+        if(!grounded) {
+            // we check collisions.up here to prevent weird glitches when player hits a ceiling
+            if(collisions.right && !collisions.up && rb.velocity.x >= 0f) {
+                isOnWall = true;
+            } else if(collisions.left && !collisions.up && rb.velocity.x <= 0f) {
+                isOnWall = true;
+            }
+        }
     }
     
 }
