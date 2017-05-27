@@ -35,22 +35,23 @@ public class PlayerAnimationController : MonoBehaviour {
             }
         }
 
+        // update animation state
+        if(playerMovement.grounded) {
+            if(Mathf.Abs(rb.velocity.x) >= PlayerMovement.PLAYER_MIN_MOVE_SPEED) {
+                an.SetTrigger("run");
 
-        if(playerMovement.grounded && (Mathf.Abs(rb.velocity.x) >= PlayerMovement.PLAYER_MIN_MOVE_SPEED)) {
-            Debug.Log("lskjflds");
-            an.SetTrigger("run");
-
-            if(Input.GetAxis("Sprint") != 0 && playerData.stamina > 0f) {
-                an.SetFloat("runSpeed", RUN_SPEED_SPRINT);
+                if(Input.GetAxis("Sprint") != 0 && playerData.stamina > 0f) {
+                    an.SetFloat("runSpeed", RUN_SPEED_SPRINT);
+                } else {
+                    an.SetFloat("runSpeed", RUN_SPEED_NORMAL);
+                }
             } else {
-                an.SetFloat("runSpeed", RUN_SPEED_NORMAL);
+                an.SetTrigger("stop");
             }
         } else {
-            if(playerMovement.grounded && rb.velocity.x < PlayerMovement.PLAYER_MIN_MOVE_SPEED) {
-                an.SetTrigger("stop");
-            } else if(!playerMovement.isOnWall) {
+            if(!playerMovement.isOnWall) {
                 an.SetTrigger("jump");
-            } else if(playerMovement.isOnWall) {
+            } else {
                 an.SetTrigger("wall");
             }
         }
