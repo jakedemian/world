@@ -27,14 +27,17 @@ public class PlayerAnimationController : MonoBehaviour {
     }
 
     void Update() {
-        if(rb.velocity.x < 0) {
-            transform.localScale = new Vector2(-startingXScale, transform.localScale.y);
-        } else if(rb.velocity.x > 0){
-            transform.localScale = new Vector2(startingXScale, transform.localScale.y);
+        if(!combatCtrl.activeShield) {
+            if(rb.velocity.x < 0) {
+                transform.localScale = new Vector2(-startingXScale, transform.localScale.y);
+            } else if(rb.velocity.x > 0) {
+                transform.localScale = new Vector2(startingXScale, transform.localScale.y);
+            }
         }
 
 
         if(playerMovement.grounded && (Mathf.Abs(rb.velocity.x) >= PlayerMovement.PLAYER_MIN_MOVE_SPEED)) {
+            Debug.Log("lskjflds");
             an.SetTrigger("run");
 
             if(Input.GetAxis("Sprint") != 0 && playerData.stamina > 0f) {
@@ -43,21 +46,16 @@ public class PlayerAnimationController : MonoBehaviour {
                 an.SetFloat("runSpeed", RUN_SPEED_NORMAL);
             }
         } else {
-            an.SetTrigger("stop");
+            if(playerMovement.grounded && rb.velocity.x < PlayerMovement.PLAYER_MIN_MOVE_SPEED) {
+                an.SetTrigger("stop");
+            } else if(!playerMovement.isOnWall) {
+                an.SetTrigger("jump");
+            } else if(playerMovement.isOnWall) {
+                an.SetTrigger("wall");
+            }
         }
 
-        if(playerMovement.grounded && !playerMovement.isOnWall) {
-            Debug.Log("1");
-            an.SetTrigger("land");
-        } else if(!playerMovement.isOnWall) {
-            Debug.Log("2");
-
-            an.SetTrigger("jump");
-        } else if(playerMovement.isOnWall) {
-            Debug.Log("3");
-
-            an.SetTrigger("wall");
-        }
+        
     }
 
 }

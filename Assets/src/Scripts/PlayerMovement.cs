@@ -288,6 +288,7 @@ public class PlayerMovement : MonoBehaviour {
             && collisionPointToColliderCenterHorizontalDistance <= 0.51f
             && rb.velocity.y <= arbitraryThresholdForVerticalPositionFix) {
             transform.position = new Vector2(transform.position.x, downHit.collider.gameObject.transform.position.y + 1f);
+            rb.velocity = new Vector2(rb.velocity.x, 0f);
         }
     }
 
@@ -345,7 +346,7 @@ public class PlayerMovement : MonoBehaviour {
         collisions.down = downHit;
         if(collisions.down) {
             collisions.downCollisionObj = downHit.collider.gameObject;
-            preventPlayerPhaseThroughGround(downHit);            
+            preventPlayerPhaseThroughGround(downHit);
         }
 
         if((collisions.right || collisions.left) && collisions.down) {
