@@ -45,7 +45,7 @@ public class PlayerMovement : MonoBehaviour {
 
     private const float JUMP_FORCE = 16f;
     private const float WALL_JUMP_FORCE = 12f;
-    private Vector2 WALL_JUMP_DIRECTION_WEIGHT = new Vector2(0.75f, 1.5f);
+    private Vector2 WALL_JUMP_DIRECTION_WEIGHT = new Vector2(0.85f, 1.5f);
 
     private const float JUMP_FORCE_RELEASE_DIVIDER = 1.5f;
 
