@@ -5,6 +5,7 @@ using UnityEngine;
 public class PlayerAnimationController : MonoBehaviour {
     private Animator an;
     private PlayerMovement playerMovement;
+    private StandardPhysicsController physicsCtrl;
     private PlayerCombatController combatCtrl;
     private PlayerData playerData;
     private Rigidbody2D rb;
@@ -21,6 +22,7 @@ public class PlayerAnimationController : MonoBehaviour {
         playerMovement = GetComponent<PlayerMovement>();
         combatCtrl = GetComponent<PlayerCombatController>();
         playerData = GetComponent<PlayerData>();
+        physicsCtrl = GetComponent<StandardPhysicsController>();
         rb = GetComponent<Rigidbody2D>();
 
         startingXScale = transform.localScale.x;
@@ -38,7 +40,7 @@ public class PlayerAnimationController : MonoBehaviour {
         }
 
         // update animation state
-        if(playerMovement.grounded) {
+        if(physicsCtrl.grounded) {
             if(Mathf.Abs(rb.velocity.x) >= PlayerMovement.PLAYER_MIN_MOVE_SPEED) {
                 an.SetTrigger("run");
 
@@ -51,7 +53,7 @@ public class PlayerAnimationController : MonoBehaviour {
                 an.SetTrigger("stop");
             }
         } else {
-            if(!playerMovement.isOnWall) {
+            if(!physicsCtrl.isOnWall) {
                 an.SetTrigger("jump");
             } else {
                 an.SetTrigger("wall");

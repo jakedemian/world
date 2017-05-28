@@ -5,6 +5,7 @@ using UnityEngine;
 public class PlayerSaveController : MonoBehaviour {
     private PlayerData playerData;
     private PlayerMovement playerMovement;
+    private StandardPhysicsController physicsCtrl;
 
     private struct SaveData {
         public Vector2 pos;
@@ -28,6 +29,7 @@ public class PlayerSaveController : MonoBehaviour {
     void Start () {
         playerData = GetComponent<PlayerData>();
         playerMovement = GetComponent<PlayerMovement>();
+        physicsCtrl = GetComponent<StandardPhysicsController>();
 
         // try to load save data from file
         if(false) { // we can load save data
@@ -45,7 +47,7 @@ public class PlayerSaveController : MonoBehaviour {
             goToLastSave();
         }
 
-        if(playerMovement.grounded && isPlayerNearLamp() && Input.GetButtonDown("Interact")) {            
+        if(physicsCtrl.grounded && isPlayerNearLamp() && Input.GetButtonDown("Interact")) {            
             updateSave();
         }
         
