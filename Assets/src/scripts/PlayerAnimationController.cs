@@ -29,9 +29,11 @@ public class PlayerAnimationController : MonoBehaviour {
     void Update() {
         if(!combatCtrl.activeShield) {
             if(rb.velocity.x < 0) {
-                transform.localScale = new Vector2(-startingXScale, transform.localScale.y);
+                GetComponent<SpriteRenderer>().flipX = true;
+                //transform.localScale = new Vector3(-startingXScale, transform.localScale.y, 1f);
             } else if(rb.velocity.x > 0) {
-                transform.localScale = new Vector2(startingXScale, transform.localScale.y);
+                GetComponent<SpriteRenderer>().flipX = false;
+                //transform.localScale = new Vector3(startingXScale, transform.localScale.y, 1f);
             }
         }
 
