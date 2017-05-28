@@ -123,31 +123,14 @@ public class PlayerMovement : MonoBehaviour {
 
     private void handleCollisionWithEnemy(GameObject enemyCollision) {
         //knock the player back, deal damage to the player, if the damage timer is zero
-        if(enemyCollision.transform.position.y < transform.position.y) {
-            if(enemyCollision.transform.position.x < transform.position.x) {
-                rb.velocity = new Vector2(5f, 5f);
-            } else if(enemyCollision.transform.position.x > transform.position.x) {
-                rb.velocity = new Vector2(-5f, 5f);
-            } else {
-                rb.velocity = new Vector2(-rb.velocity.x, 5f);
-            }
-        } else if(enemyCollision.transform.position.y > transform.position.y) {
-            if(enemyCollision.transform.position.x < transform.position.x) {
-                rb.velocity = new Vector2(5f, -5f);
-            } else if(enemyCollision.transform.position.x > transform.position.x) {
-                rb.velocity = new Vector2(-5f, -5f);
-            } else {
-                rb.velocity = new Vector2(-rb.velocity.x, -5f);
-            }
-        } else {
-            if(enemyCollision.transform.position.x < transform.position.x) {
-                rb.velocity = new Vector2(5f, -rb.velocity.y);
-            } else if(enemyCollision.transform.position.x > transform.position.x) {
-                rb.velocity = new Vector2(-5f, -rb.velocity.y);
-            } else {
-                rb.velocity = new Vector2(-rb.velocity.x, -rb.velocity.y);
-            }
-        }
+        float xPosDiff = transform.position.x - enemyCollision.transform.position.x;
+        float yPosDiff = transform.position.y - enemyCollision.transform.position.y;
+
+        // gaurentees an x speed of 8, to help them get away from the enemy
+        float xSpeed = ((xPosDiff) / Mathf.Abs(xPosDiff)) * 8f;
+        float ySpeed = yPosDiff * 5f;
+        rb.velocity = new Vector2(xSpeed, ySpeed);
+
         // lock the player's input
         if(inputLockTimer == 0f) {
             inputLockTimer = DAMAGE_TAKEN_INPUT_LOCK_TIMER;
