@@ -60,18 +60,13 @@ public class PlayerSaveController : MonoBehaviour {
 
         GameObject[] activeLamps = GameObject.FindGameObjectsWithTag("Lamp");
         for(int i = 0; i < activeLamps.Length; i++) {
-            if(getDistanceBetweenTwoPoints(activeLamps[i].transform.position, transform.position) < MAX_DISTANCE_FROM_LAMP_TO_SAVE) {
+            if(Utilities.getDistanceBetweenTwoPoints(activeLamps[i].transform.position, transform.position) < MAX_DISTANCE_FROM_LAMP_TO_SAVE) {
                 res = true;
                 break;
             }
         }
 
         return res;
-    }
-
-    // TODO kick this out into a Utilities static class function
-    private float getDistanceBetweenTwoPoints(Vector2 a, Vector2 b) {
-        return Mathf.Sqrt(Mathf.Pow(a.x-b.x,2) + Mathf.Pow(a.y-b.y,2));
     }
 
     /// <summary>
