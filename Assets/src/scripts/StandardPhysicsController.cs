@@ -43,7 +43,6 @@ public class StandardPhysicsController : MonoBehaviour {
     }
 
     void Update() {
-        Debug.Log(grounded);
         updateCollisions();
         capSpeed();
     }
