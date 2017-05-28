@@ -62,7 +62,7 @@ public class PlayerInputController : MonoBehaviour {
     ///     UPDATE
     /// </summary>
 	void Update () {
-        GameObject enemyCollision = collisionWithEnemy();
+        GameObject enemyCollision = hasCollisionWithEnemy();
         if(enemyCollision != null) {
             handleCollisionWithEnemy(enemyCollision);
         }
@@ -85,6 +85,11 @@ public class PlayerInputController : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    ///     Handle what happens when you collide with an enemy.
+    ///     // TODO FIXME might make sense to make this a more general "takeDamage" function.
+    /// </summary>
+    /// <param name="enemyCollision">The collision point of the damage source.</param>
     private void handleCollisionWithEnemy(GameObject enemyCollision) {
         //knock the player back, deal damage to the player, if the damage timer is zero
         float xPosDiff = transform.position.x - enemyCollision.transform.position.x;
@@ -102,7 +107,11 @@ public class PlayerInputController : MonoBehaviour {
         }
     }
 
-    private GameObject collisionWithEnemy() {
+    /// <summary>
+    ///     Determine if the player has a collision with the enemy.
+    /// </summary>
+    /// <returns></returns>
+    private GameObject hasCollisionWithEnemy() {
         GameObject res = null;
 
         if(physicsCtrl.collisions.leftCollisionObj != null && physicsCtrl.collisions.leftCollisionObj.tag == "Enemy") {
