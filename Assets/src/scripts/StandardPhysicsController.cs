@@ -43,6 +43,7 @@ public class StandardPhysicsController : MonoBehaviour {
     }
 
     void Update() {
+        Debug.Log(grounded);
         updateCollisions();
         capSpeed();
     }
@@ -124,6 +125,12 @@ public class StandardPhysicsController : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    ///     Check if both downward raycasts are colliding.
+    /// </summary>
+    /// <param name="startPoint1">The start point of the first raycast.</param>
+    /// <param name="startPoint2">The start point of the second raycast.</param>
+    /// <returns>True if both are colliding, false otherwise.</returns>
     private bool isBothDownRaycastsColliding(Vector2 startPoint1, Vector2 startPoint2) {
         bool res = false;
 

@@ -7,7 +7,7 @@ public class ChunkController : MonoBehaviour {
 
     private GameObject[] allChunks;
     private GameObject player;
-    private PlayerMovement playerMovement;
+    private PlayerInputController playerMovement;
 
     private const float CHUNK_LOAD_DISTANCE = 40f;
 
@@ -18,7 +18,7 @@ public class ChunkController : MonoBehaviour {
         // get the player
         player = GameObject.FindWithTag("Player");
         if(player != null) {
-            playerMovement = player.GetComponent<PlayerMovement>();
+            playerMovement = player.GetComponent<PlayerInputController>();
         } else {
             Debug.LogError("Unable to find the player.  ChunkController will not work.");
         }

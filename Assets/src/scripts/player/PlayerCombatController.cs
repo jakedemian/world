@@ -17,7 +17,7 @@ public class PlayerCombatController : MonoBehaviour {
     private Vector2 slashRelativePosToPlayer = new Vector2(0f, 0f);
 
     private PlayerData playerData;
-    private PlayerMovement playerMovement;
+    private PlayerInputController playerMovement;
 
     private int swingState = 0;
     private float swingTimer = 0f;
@@ -32,7 +32,7 @@ public class PlayerCombatController : MonoBehaviour {
     /// </summary>
     void Start() {
         playerData = GetComponent<PlayerData>();
-        playerMovement = GetComponent<PlayerMovement>();
+        playerMovement = GetComponent<PlayerInputController>();
     }
 
     /// <summary>

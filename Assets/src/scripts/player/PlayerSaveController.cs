@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PlayerSaveController : MonoBehaviour {
     private PlayerData playerData;
-    private PlayerMovement playerMovement;
+    private PlayerInputController playerMovement;
     private StandardPhysicsController physicsCtrl;
 
     private struct SaveData {
@@ -28,7 +28,7 @@ public class PlayerSaveController : MonoBehaviour {
     /// </summary>
     void Start () {
         playerData = GetComponent<PlayerData>();
-        playerMovement = GetComponent<PlayerMovement>();
+        playerMovement = GetComponent<PlayerInputController>();
         physicsCtrl = GetComponent<StandardPhysicsController>();
 
         // try to load save data from file
@@ -84,7 +84,7 @@ public class PlayerSaveController : MonoBehaviour {
 
     /// <summary>
     ///     Initialize the save object.
-    /// </summary>
+    /// </summary>da
     private void initSaveData() {
         save = new SaveData();
         updateSave();

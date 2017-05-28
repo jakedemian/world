@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PlayerAnimationController : MonoBehaviour {
     private Animator an;
-    private PlayerMovement playerMovement;
+    private PlayerInputController playerMovement;
     private StandardPhysicsController physicsCtrl;
     private PlayerCombatController combatCtrl;
     private PlayerData playerData;
@@ -19,7 +19,7 @@ public class PlayerAnimationController : MonoBehaviour {
 
     void Start() {
         an = GetComponent<Animator>();
-        playerMovement = GetComponent<PlayerMovement>();
+        playerMovement = GetComponent<PlayerInputController>();
         combatCtrl = GetComponent<PlayerCombatController>();
         playerData = GetComponent<PlayerData>();
         physicsCtrl = GetComponent<StandardPhysicsController>();
@@ -41,7 +41,7 @@ public class PlayerAnimationController : MonoBehaviour {
 
         // update animation state
         if(physicsCtrl.grounded) {
-            if(Mathf.Abs(rb.velocity.x) >= PlayerMovement.PLAYER_MIN_MOVE_SPEED) {
+            if(Mathf.Abs(rb.velocity.x) >= PlayerInputController.PLAYER_MIN_MOVE_SPEED) {
                 an.SetTrigger("run");
 
                 if(Input.GetAxis("Sprint") != 0 && playerData.stamina > 0f) {
