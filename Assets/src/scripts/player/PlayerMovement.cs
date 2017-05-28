@@ -91,7 +91,7 @@ public class PlayerMovement : MonoBehaviour {
         bool wasInAir = !collisions.down;
         updateCollisions();
 
-        if(wasInAir && grounded) {
+        if(wasInAir && grounded && rb.velocity.x == 0f) {
             // player has landed, play sound
             soundCtrl.playLandSound(collisions.downCollisionObj.tag, transform);
         }
