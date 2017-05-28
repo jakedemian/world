@@ -98,6 +98,7 @@ public class PlayerSaveController : MonoBehaviour {
         playerData.maxStam = save.maxStam;
         playerData.health = playerData.maxHealth;
         playerData.stamina = playerData.maxStam;
+        playerMovement.rb.velocity = Vector2.zero;
 
 
         // last, we must update player position and load world around him

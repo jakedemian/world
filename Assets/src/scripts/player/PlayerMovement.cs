@@ -19,8 +19,9 @@ public class PlayerMovement : MonoBehaviour {
     [HideInInspector]
     public bool isOnWall = false;
 
+    [HideInInspector]
+    public Rigidbody2D rb;
 
-    private Rigidbody2D rb;
     private PlayerSoundController soundCtrl;
     private CollisionDirections collisions = new CollisionDirections();
     private Bounds playerBounds;
@@ -53,6 +54,8 @@ public class PlayerMovement : MonoBehaviour {
     private const float ROLL_DELAY_TIMER = 0.3f;
 
     private const float COLLISION_RAYCAST_DISTANCE = 0.05f;
+
+    private const float DAMAGE_TAKEN_INPUT_LOCK_TIMER = 0.4f;
     
 	/// <summary>
     ///     START
@@ -96,6 +99,11 @@ public class PlayerMovement : MonoBehaviour {
             soundCtrl.playLandSound(collisions.downCollisionObj.tag, transform);
         }
 
+        GameObject enemyCollision = collisionWithEnemy();
+        if(enemyCollision != null) {
+            handleCollisionWithEnemy(enemyCollision);
+        }
+
         handleUserInput();
         capPlayerSpeed();
 
@@ -111,6 +119,56 @@ public class PlayerMovement : MonoBehaviour {
         if(!grounded || rb.velocity.x == 0f) {
             soundCtrl.stopFootsteps();
         }
+    }
+
+    private void handleCollisionWithEnemy(GameObject enemyCollision) {
+        //knock the player back, deal damage to the player, if the damage timer is zero
+        if(enemyCollision.transform.position.y < transform.position.y) {
+            if(enemyCollision.transform.position.x < transform.position.x) {
+                rb.velocity = new Vector2(5f, 5f);
+            } else if(enemyCollision.transform.position.x > transform.position.x) {
+                rb.velocity = new Vector2(-5f, 5f);
+            } else {
+                rb.velocity = new Vector2(-rb.velocity.x, 5f);
+            }
+        } else if(enemyCollision.transform.position.y > transform.position.y) {
+            if(enemyCollision.transform.position.x < transform.position.x) {
+                rb.velocity = new Vector2(5f, -5f);
+            } else if(enemyCollision.transform.position.x > transform.position.x) {
+                rb.velocity = new Vector2(-5f, -5f);
+            } else {
+                rb.velocity = new Vector2(-rb.velocity.x, -5f);
+            }
+        } else {
+            if(enemyCollision.transform.position.x < transform.position.x) {
+                rb.velocity = new Vector2(5f, -rb.velocity.y);
+            } else if(enemyCollision.transform.position.x > transform.position.x) {
+                rb.velocity = new Vector2(-5f, -rb.velocity.y);
+            } else {
+                rb.velocity = new Vector2(-rb.velocity.x, -rb.velocity.y);
+            }
+        }
+        // lock the player's input
+        if(inputLockTimer == 0f) {
+            inputLockTimer = DAMAGE_TAKEN_INPUT_LOCK_TIMER;
+            playerData.health--;
+        }
+    }
+
+    private GameObject collisionWithEnemy() {
+        GameObject res = null;
+
+        if(collisions.leftCollisionObj != null && collisions.leftCollisionObj.tag == "Enemy") {
+            res = collisions.leftCollisionObj;
+        } else if(collisions.rightCollisionObj != null && collisions.rightCollisionObj.tag == "Enemy") {
+            res = collisions.rightCollisionObj;
+        } else if(collisions.upCollisionObj != null && collisions.upCollisionObj.tag == "Enemy") {
+            res = collisions.upCollisionObj;
+        } else if(collisions.downCollisionObj != null && collisions.downCollisionObj.tag == "Enemy") {
+            res = collisions.downCollisionObj;
+        }
+
+        return res;
     }
 
     private void handleUserInput() {
