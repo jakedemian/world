@@ -11,6 +11,9 @@ public class ShieldData {
     private string shieldName;
     private string description;
     private float shieldDistanceFromPlayer = 1f;
+    private string frontImageName;
+    private string backImageName;
+    private string sideImageName;
 
     public ShieldData() {
         // if not given a sword id, default to the default 
@@ -45,6 +48,12 @@ public class ShieldData {
                         this.description = shieldAttr.InnerText.Trim();
                     } else if(shieldAttr.Name == "distance-from-player") {
                         this.shieldDistanceFromPlayer = float.Parse(shieldAttr.InnerText.Trim());
+                    } else if(shieldAttr.Name == "front-image-name") {
+                        this.frontImageName = shieldAttr.InnerText.Trim();
+                    } else if(shieldAttr.Name == "back-image-name") {
+                        this.backImageName = shieldAttr.InnerText.Trim();
+                    } else if(shieldAttr.Name == "side-image-name") {
+                        this.sideImageName = shieldAttr.InnerText.Trim();
                     }
                 }
             }
@@ -65,5 +74,35 @@ public class ShieldData {
 
     public float getDistanceFromPlayer() {
         return this.shieldDistanceFromPlayer;
+    }
+
+    public string getFrontImagePath() {
+        string res = "";
+
+        if(frontImageName != null) {
+            res = "Assets/sprites/shields/" + frontImageName;
+        }
+
+        return res;
+    }
+
+    public string getBackImagePath() {
+        string res = "";
+
+        if(backImageName != null) {
+            res = "Assets/sprites/shields/" + backImageName;
+        }
+
+        return res;
+    }
+
+    public string getSideImagePath() {
+        string res = "";
+
+        if(sideImageName != null) {
+            res = "Assets/sprites/shields/" + sideImageName;
+        }
+
+        return res;
     }
 }

@@ -18,7 +18,7 @@ public class SwordData{
 
     private float baseDamage;
 
-    private string imagePath;
+    private string imageName;
 
     private float swordPreSwingDelay;
     private float swingTime;
@@ -60,8 +60,8 @@ public class SwordData{
                         this.description = swordAttr.InnerText.Trim();
                     } else if(swordAttr.Name == "base-damage") {
                         this.baseDamage = float.Parse(swordAttr.InnerText.Trim());
-                    } else if(swordAttr.Name == "inventory-image-path") {
-                        this.imagePath = swordAttr.InnerText.Trim();
+                    } else if(swordAttr.Name == "sprite-image-name") {
+                        this.imageName = swordAttr.InnerText.Trim();
                     } else if(swordAttr.Name == "preswing-delay") {
                         this.swordPreSwingDelay = float.Parse(swordAttr.InnerText.Trim());
                     } else if (swordAttr.Name == "swing-time") {
@@ -98,5 +98,15 @@ public class SwordData{
 
     public float getSwordSwingDistanceFromPlayer() {
         return this.swingDistanceFromPlayer;
+    }
+
+    public string getImagePath() {
+        string res = "";
+
+        if(imageName != null) {
+            res = "Assets/sprites/weapons/" + imageName;
+        }
+
+        return res;
     }
 }

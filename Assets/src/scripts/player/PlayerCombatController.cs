@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 
 public class PlayerCombatController : MonoBehaviour {
     public List<GameObject> swordSlashPrefabs;
@@ -13,19 +14,29 @@ public class PlayerCombatController : MonoBehaviour {
     [HideInInspector]
     public bool shieldIsUp = false;
 
-    private GameObject currentSwordSlash = null;
-    private Vector2 slashRelativePosToPlayer = new Vector2(0f, 0f);
+    // FIXME ? do these need to be public??
+    [HideInInspector]
+    public GameObject equippedSword;
+
+    [HideInInspector]
+    public GameObject equippedShield;
 
     private PlayerData playerData;
     private PlayerInputController playerMovement;
-
-    private int swingState = 0;
-    private float swingTimer = 0f;
     private SwordData swordData = new SwordData();
     private ShieldData shieldData = new ShieldData();
-    
-    // TODO FIXME do the same thing with shields as i did with swords
 
+    private GameObject currentSwordSlash = null;
+    private Vector2 slashRelativePosToPlayer = new Vector2(0f, 0f);   
+
+    private int swingState = 0;
+    private float swingTimer = 0f;    
+    private SpriteRenderer equippedSwordSpriteRenderer;
+    private Sprite equippedWeaponSprite;
+
+    private SpriteRenderer equippedShieldSpriteRenderer;
+    private Sprite equippedShieldSprite;
+    
 
     /// <summary>
     ///     START
@@ -33,6 +44,15 @@ public class PlayerCombatController : MonoBehaviour {
     void Start() {
         playerData = GetComponent<PlayerData>();
         playerMovement = GetComponent<PlayerInputController>();
+        equippedSword = GameObject.FindWithTag("EquippedSword");
+        equippedSwordSpriteRenderer = equippedSword.GetComponent<SpriteRenderer>();
+
+        equippedShield = GameObject.FindWithTag("EquippedShield");
+        equippedShieldSpriteRenderer = equippedShield.GetComponent<SpriteRenderer>();
+
+        // TODO combine these into one method
+        setEquippedSword();
+        setEquippedShield();
     }
 
     /// <summary>
@@ -50,10 +70,10 @@ public class PlayerCombatController : MonoBehaviour {
                     activeShield = Instantiate(equippedShieldPrefab, new Vector2(transform.position.x - shieldData.getDistanceFromPlayer(), transform.position.y), Quaternion.identity);
                     activeShield.transform.localScale = new Vector2(-1f, activeShield.transform.localScale.y);
                 }
+                activeShield.GetComponent<SpriteRenderer>().sprite = AssetDatabase.LoadAssetAtPath<Sprite>(shieldData.getSideImagePath());
             }
 
             // TODO move this to shield object
-            updateShieldPosition();
         } else if(shieldIsUp) {
             shieldIsUp = false;
             Destroy(activeShield);
@@ -69,6 +89,8 @@ public class PlayerCombatController : MonoBehaviour {
 
         // TODO move this to swing object
         updateSlashPosition();
+        updateShieldPosition();
+        updateEquipmentOrientation();
     }
 
     /// <summary>
@@ -78,6 +100,17 @@ public class PlayerCombatController : MonoBehaviour {
         if(swingState != SwordData.SWING_STATE_NONE) {
             swingTimer -= Time.deltaTime;
             manageSwingState();
+        }
+    }
+
+    private void updateEquipmentOrientation() {
+        // update sword and shield x scale based on facing direction
+        if(playerMovement.currentFacingDirection == 1) {
+            equippedSword.transform.localScale = new Vector2(1f, equippedSword.transform.localScale.y);
+            equippedShield.transform.localScale = new Vector2(1f, equippedSword.transform.localScale.y);
+        } else {
+            equippedSword.transform.localScale = new Vector2(-1f, equippedSword.transform.localScale.y);
+            equippedShield.transform.localScale = new Vector2(-1f, equippedSword.transform.localScale.y);
         }
     }
 
@@ -108,10 +141,18 @@ public class PlayerCombatController : MonoBehaviour {
     /// </summary>
     private void updateShieldPosition() {
         if(activeShield != null) {
+            if(equippedShield.activeInHierarchy) {
+                equippedShield.SetActive(false);
+            }
+
             if(playerMovement.currentFacingDirection == 1) {
                 activeShield.transform.position = new Vector2(transform.position.x + shieldData.getDistanceFromPlayer(), transform.position.y);
             } else {
                 activeShield.transform.position = new Vector2(transform.position.x - shieldData.getDistanceFromPlayer(), transform.position.y);
+            }
+        } else {
+            if(!equippedShield.activeInHierarchy) {
+                equippedShield.SetActive(true);
             }
         }
     }
@@ -121,6 +162,10 @@ public class PlayerCombatController : MonoBehaviour {
     /// </summary>
     private void swingSword() {
         int slashIdx = Random.Range(0, swordSlashPrefabs.Count);
+
+        // TODO
+        // TODO make this more efficient
+        // TODO
 
         playerData.useStamina(20f);
         string analogPrimaryDir = InputHelper.getPrimaryAnalogStickDirection();
@@ -149,7 +194,37 @@ public class PlayerCombatController : MonoBehaviour {
     /// </summary>
     private void updateSlashPosition() {
         if(currentSwordSlash != null) {
+            if(equippedSword.activeInHierarchy) {
+                equippedSword.SetActive(false);
+            }
+
             currentSwordSlash.transform.position = new Vector2(transform.position.x + slashRelativePosToPlayer.x, transform.position.y + slashRelativePosToPlayer.y);
+        } else {
+            if(!equippedSword.activeInHierarchy) {
+                equippedSword.SetActive(true);
+            }
         }
-    }	
+    }
+
+    private void setEquippedSword() {
+        // FIXME do i need to actually store this as a member var???
+        equippedWeaponSprite = AssetDatabase.LoadAssetAtPath<Sprite>(swordData.getImagePath());
+        equippedSwordSpriteRenderer.sprite = equippedWeaponSprite;
+    }
+
+    private void setEquippedShield() {
+        // FIXME do i need to actually store this as a member var???
+        equippedShieldSprite = AssetDatabase.LoadAssetAtPath<Sprite>(shieldData.getBackImagePath());
+        equippedShieldSpriteRenderer.sprite = equippedShieldSprite;
+    }
+
+    private void changeSword(int swordId) {
+        swordData = new SwordData(swordId);
+        setEquippedSword();
+    }
+
+    private void changeShield(int shieldId) {
+        shieldData = new ShieldData(shieldId);
+        setEquippedShield();
+    }
 }

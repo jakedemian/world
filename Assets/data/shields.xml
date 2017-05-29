@@ -4,5 +4,8 @@
     <name>Default Shield</name>
     <description>The default shield that you begin with in World.</description>
     <distance-from-player>1.0</distance-from-player>
+    <front-image-name>default-shield-front.png</front-image-name>
+    <back-image-name>default-shield-back.png</back-image-name>
+    <side-image-name>default-shield-side.png</side-image-name>
   </shield>
 </shields>
