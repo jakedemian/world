@@ -84,7 +84,7 @@ public class PlayerCombatController : MonoBehaviour {
         if(Input.GetButtonDown("Swing") && playerData.stamina > 0f && currentSwordSlash == null && !activeShield && swingState == SwordData.SWING_STATE_NONE) {
             swingState = SwordData.SWING_STATE_PRESWING;
             swingTimer = swordData.getSwordPreSwingDelay();
-            playerMovement.playerLocked = true;
+            //playerMovement.playerLocked = true;
         }
 
         // TODO move this to swing object
@@ -131,7 +131,7 @@ public class PlayerCombatController : MonoBehaviour {
             } else if(swingState == SwordData.SWING_STATE_POSTSWING) {
                 swingState = SwordData.SWING_STATE_NONE;
                 swingTimer = 0f;
-                playerMovement.playerLocked = false;
+                //playerMovement.playerLocked = false;
             }
         }
     }
